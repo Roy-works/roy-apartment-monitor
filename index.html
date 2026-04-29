@@ -6,550 +6,680 @@
 <title>מוניטור דירות — נחלת יצחק</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <style>
 :root {
   color-scheme: light;
-  --bg: #f6f5f0;
-  --surface: #ffffff;
-  --surface-2: #f0eee6;
-  --surface-3: #e8e5da;
-  --border: #e1ddce;
-  --border-strong: #c8c2ae;
-  --ink: #14110d;
-  --ink-2: #46433d;
-  --ink-3: #8a857a;
-  --ink-4: #b8b3a3;
-  --good: #1f6b3a;
-  --good-bg: #e1efe5;
-  --good-bg-strong: #c1dfca;
-  --warn: #ad6f0c;
-  --warn-bg: #faecd0;
-  --bad: #b03030;
-  --bad-bg: #fae3e3;
-  --info: #1f4d8a;
-  --info-bg: #e1ecf7;
-  --hot: #d96a18;
-  --hot-bg: #fde6d3;
-  --shadow-sm: 0 1px 2px rgba(20,17,13,.04), 0 1px 3px rgba(20,17,13,.04);
-  --shadow-md: 0 2px 4px rgba(20,17,13,.04), 0 6px 16px rgba(20,17,13,.06);
-  --shadow-lg: 0 4px 8px rgba(20,17,13,.05), 0 20px 36px rgba(20,17,13,.10);
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
-  --font: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --bg:            oklch(97% 0.008 70);
+  --surface:       oklch(99.5% 0.004 70);
+  --surface2:      oklch(95% 0.010 70);
+  --border:        oklch(88% 0.010 70);
+  --border-strong: oklch(78% 0.015 70);
+  --text:          oklch(22% 0.015 250);
+  --text-2:        oklch(45% 0.012 250);
+  --text-3:        oklch(62% 0.010 250);
+  --accent:        oklch(52% 0.14 195);
+  --accent-light:  oklch(94% 0.04 195);
+  --accent-dark:   oklch(38% 0.14 195);
+  --green:         oklch(55% 0.14 155);
+  --green-light:   oklch(94% 0.05 155);
+  --red:           oklch(55% 0.16 25);
+  --red-light:     oklch(96% 0.05 25);
+  --amber:         oklch(68% 0.14 75);
+  --amber-light:   oklch(96% 0.05 75);
+  --shadow-sm:     0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow:        0 4px 12px oklch(0% 0 0 / 0.08), 0 1px 3px oklch(0% 0 0 / 0.05);
+  --shadow-lg:     0 12px 32px oklch(0% 0 0 / 0.12), 0 4px 8px oklch(0% 0 0 / 0.06);
+  --radius:        12px;
+  --radius-sm:     8px;
+  --radius-xs:     5px;
 }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; font-family: 'Assistant', sans-serif; }
 html, body { margin: 0; padding: 0; }
 body {
-  font-family: var(--font);
   background: var(--bg);
-  color: var(--ink);
+  color: var(--text);
   direction: rtl;
-  font-size: 15px;
-  line-height: 1.5;
+  min-height: 100vh;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-a { color: var(--info); text-decoration: none; }
-a:hover { text-decoration: underline; }
-button { font-family: inherit; cursor: pointer; }
+a { color: var(--accent); text-decoration: none; }
+button { font-family: 'Assistant', sans-serif; cursor: pointer; }
 
-/* ====== TOP BAR ====== */
-.topbar {
+/* ============== HEADER ============== */
+header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 50;
+  box-shadow: var(--shadow-sm);
+  height: 56px;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
-.topbar-inner {
-  max-width: 1320px; margin: 0 auto; padding: var(--space-3) var(--space-5);
-  display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap;
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
 }
-.brand { display: flex; align-items: baseline; gap: var(--space-3); }
-.brand-mark {
-  width: 32px; height: 32px; border-radius: var(--radius-sm);
-  background: var(--ink); color: #fff;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 16px; flex-shrink: 0;
-}
-.brand-title { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; line-height: 1; }
-.brand-sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
-.stats-strip { display: flex; gap: var(--space-5); margin-right: auto; }
-.stat { display: flex; flex-direction: column; gap: 2px; }
-.stat-num { font-size: 18px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
-.stat-num.good { color: var(--good); }
-.stat-num.hot { color: var(--hot); }
-.stat-lbl { font-size: 11px; color: var(--ink-3); font-weight: 500; }
+.brand-info { display: flex; flex-direction: column; gap: 1px; }
+.logo-title   { font-size: 15px; font-weight: 700; line-height: 1; }
+.logo-subtitle { font-size: 11px; color: var(--text-3); }
+.live-wrap { display: flex; align-items: center; gap: 6px; padding-right: 6px; border-right: 1px solid var(--border); padding-left: 12px; }
 .live-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--good);
-  display: inline-block; margin-left: 6px;
-  animation: pulse-dot 2s ease-in-out infinite;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
 }
-@keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(31,107,58,.5); }
-  50% { box-shadow: 0 0 0 6px rgba(31,107,58,0); }
+.live-label { font-size: 12px; font-weight: 600; color: var(--green); }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.header-stats { display: flex; margin-right: auto; }
+.header-stat {
+  padding: 0 14px;
+  border-left: 1px solid var(--border);
+  text-align: center;
+}
+.header-stat:last-child { border-left: none; }
+.header-stat-value { font-size: 17px; font-weight: 700; line-height: 1.1; }
+.header-stat-value.green { color: var(--green); }
+.header-stat-value.amber { color: var(--amber); }
+.header-stat-label { font-size: 10px; color: var(--text-3); letter-spacing: 0.3px; }
+
+/* ============== LAYOUT ============== */
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
 }
 
-/* ====== TABS ====== */
-.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); }
-.tabs-inner { max-width: 1320px; margin: 0 auto; padding: 0 var(--space-5); display: flex; gap: var(--space-1); width: 100%; }
+/* ============== STATS PANEL ============== */
+.stats-panel {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.stat-card.accent {
+  background: var(--accent);
+  color: white;
+  border-color: transparent;
+}
+.stat-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.4px; text-transform: uppercase;
+  opacity: 0.65;
+}
+.stat-value {
+  font-size: 26px; font-weight: 700;
+  line-height: 1.1; letter-spacing: -0.5px;
+}
+.stat-sub { font-size: 12px; opacity: 0.65; }
+
+/* ============== TABS ============== */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+}
 .tab {
-  background: none; border: none; padding: var(--space-3) var(--space-4);
-  font-size: 14px; font-weight: 600; color: var(--ink-3);
-  border-bottom: 3px solid transparent; transition: color .15s, border-color .15s;
-  display: inline-flex; align-items: center; gap: 8px;
+  flex: 1; padding: 8px 0;
+  border-radius: 9px;
+  font-size: 14px; font-weight: 500;
+  color: var(--text-2);
+  background: transparent;
+  border: none; cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.tab:hover { color: var(--ink); }
-.tab.active { color: var(--ink); border-bottom-color: var(--ink); }
-.tab .badge {
-  background: var(--surface-2); color: var(--ink-2); font-size: 11px; font-weight: 700;
-  padding: 2px 8px; border-radius: 999px;
+.tab:hover:not(.active) { color: var(--text); background: var(--surface2); }
+.tab.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
 }
-.tab.active .badge { background: var(--ink); color: #fff; }
+.tab-badge {
+  font-size: 11px; font-weight: 700;
+  padding: 1px 7px; border-radius: 99px;
+  background: var(--surface2); color: var(--text-3);
+}
+.tab.active .tab-badge {
+  background: rgba(255,255,255,0.25);
+  color: white;
+}
 
-/* ====== FILTER BAR ====== */
-.filterbar {
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  padding: var(--space-4) var(--space-5);
+/* ============== CONTENT GRID ============== */
+.content-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
 }
-.filterbar-inner {
-  max-width: 1320px; margin: 0 auto;
-  display: flex; gap: var(--space-5); flex-wrap: wrap; align-items: flex-end;
-}
-.filter-group { display: flex; flex-direction: column; gap: 6px; }
-.filter-label { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; }
-.range-wrap { display: flex; align-items: center; gap: var(--space-3); min-width: 280px; }
-.range-vals { font-weight: 700; font-size: 14px; min-width: 130px; }
-.range-vals span { color: var(--ink); }
-.range-vals em { color: var(--ink-3); font-style: normal; font-size: 12px; margin: 0 4px; }
-input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: var(--surface-3); border-radius: 999px; outline: none; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
-input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--ink); cursor: pointer; border: none; }
 
-.toggle-group { display: flex; gap: 4px; padding: 3px; background: var(--surface-2); border-radius: var(--radius); }
-.toggle-pill {
-  background: none; border: none; padding: 6px 12px; border-radius: 7px;
-  font-size: 13px; font-weight: 600; color: var(--ink-2); transition: all .15s;
+/* ============== SIDEBAR ============== */
+.sidebar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 76px;
+  display: flex; flex-direction: column; gap: 22px;
 }
-.toggle-pill:hover { color: var(--ink); }
-.toggle-pill.active { background: var(--ink); color: #fff; box-shadow: var(--shadow-sm); }
-
+.filter-section { display: flex; flex-direction: column; gap: 10px; }
+.filter-section-title {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
 .chip-group { display: flex; gap: 6px; flex-wrap: wrap; }
 .chip {
-  background: var(--surface); border: 1px solid var(--border-strong); border-radius: 999px;
-  padding: 6px 12px; font-size: 13px; font-weight: 500; color: var(--ink-2);
-  display: inline-flex; align-items: center; gap: 6px; user-select: none;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
 }
-.chip:hover { border-color: var(--ink-2); color: var(--ink); }
-.chip.active { background: var(--ink); border-color: var(--ink); color: #fff; }
-.chip.danger.active { background: var(--bad); border-color: var(--bad); }
-.chip.good.active { background: var(--good); border-color: var(--good); }
+.chip:hover { border-color: var(--border-strong); }
+.chip.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+.checkbox-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); cursor: pointer; user-select: none; }
+.checkbox-row input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.price-inputs { display: flex; gap: 8px; align-items: center; }
+.price-input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  font-size: 13px;
+  background: var(--surface2);
+  color: var(--text);
+  outline: none;
+}
+.price-input:focus { border-color: var(--accent); }
+.price-sep { color: var(--text-3); font-size: 13px; }
+.reset-btn {
+  width: 100%; padding: 9px;
+  border-radius: 9px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-2);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.reset-btn:hover { background: var(--border); color: var(--text); }
 
-/* ====== SORTBAR ====== */
-.sortbar {
-  background: var(--bg); padding: var(--space-3) var(--space-5);
-  border-bottom: 1px solid var(--border);
-}
-.sortbar-inner {
-  max-width: 1320px; margin: 0 auto;
-  display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap;
+.sidebar-mini-stats { display: flex; flex-direction: column; gap: 8px; }
+.mini-stat { display: flex; justify-content: space-between; font-size: 12px; }
+.mini-stat .lbl { color: var(--text-3); }
+.mini-stat .val { font-weight: 700; color: var(--text); }
+.mini-stat .val.green { color: var(--green); }
+.mini-stat .val.red { color: var(--red); }
+
+/* ============== TOOLBAR ============== */
+.toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 14px;
 }
 .sort-pill {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--ink-2);
-  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+  padding: 6px 12px; font-size: 13px; font-weight: 500; color: var(--text-2);
 }
-.sort-pill:hover { background: var(--surface-2); }
-.sort-pill.active { background: var(--ink); border-color: var(--ink); color: #fff; }
-.view-switcher { margin-right: auto; display: flex; gap: 4px; padding: 3px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
-.view-switcher button {
-  background: none; border: none; padding: 5px 10px; border-radius: 7px;
-  font-size: 13px; font-weight: 600; color: var(--ink-3);
-}
-.view-switcher button.active { background: var(--ink); color: #fff; }
-.scan-toggle {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--ink-2);
-  display: inline-flex; align-items: center; gap: 6px;
-}
-.scan-toggle.active { background: var(--info-bg); border-color: var(--info); color: var(--info); }
+.sort-pill:hover { background: var(--surface2); }
+.sort-pill.active { background: var(--accent); border-color: var(--accent); color: white; font-weight: 700; }
+.view-toggle { margin-right: auto; display: flex; gap: 2px; padding: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; }
+.view-toggle button { background: none; border: none; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--text-3); }
+.view-toggle button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
 
-/* ====== MAIN LAYOUT ====== */
-.main {
-  max-width: 1320px; margin: 0 auto; padding: var(--space-5);
-  display: grid; grid-template-columns: 280px minmax(0,1fr); gap: var(--space-5);
-}
-@media (max-width: 980px) {
-  .main { grid-template-columns: minmax(0,1fr); }
-  .main > .content-wrap { order: 1; }
-  .main > .sidebar { order: 2; }
+/* ============== APARTMENTS GRID ============== */
+.apartments-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
-/* ====== GRID / CARDS ====== */
-.grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: var(--space-4);
-}
-.card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  overflow: hidden; display: flex; flex-direction: column; position: relative;
+/* ============== APT CARD ============== */
+.apt-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
   box-shadow: var(--shadow-sm);
-  transition: transform .15s ease, box-shadow .15s ease, border-color .15s;
+  transition: all 0.18s;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  position: relative;
 }
-.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--border-strong); }
-.card.is-seen { opacity: 0.62; }
-.card.is-saved { border-color: #d4af37; box-shadow: 0 0 0 1px #d4af37, var(--shadow-md); }
-.card.is-hot { border-color: var(--hot); box-shadow: 0 0 0 1px rgba(217,106,24,.4), var(--shadow-md); }
-
-.card-img {
-  aspect-ratio: 16/10; background: var(--surface-2);
+.apt-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+.apt-card.seen {
+  opacity: 0.72;
+  background: var(--surface2);
+}
+.apt-card.saved {
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px var(--red), var(--shadow);
+}
+.apt-card.kbd-active {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.apt-image-wrap {
+  position: relative; aspect-ratio: 16/10;
+  background: var(--surface2);
   background-size: cover; background-position: center;
-  position: relative; overflow: hidden;
 }
-.card-img-fallback {
+.apt-image-fallback {
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, #2c2622 0%, #4a3f37 100%);
-  color: rgba(255,255,255,.95); display: flex; flex-direction: column;
-  align-items: center; justify-content: center; padding: var(--space-4);
-  text-align: center; gap: 6px;
+  background: linear-gradient(135deg, oklch(35% 0.04 250) 0%, oklch(25% 0.04 250) 100%);
+  color: white;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; padding: 16px; text-align: center;
 }
-.card-img-fallback .fb-num { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -1px; opacity: .95; }
-.card-img-fallback .fb-street { font-size: 14px; font-weight: 600; opacity: .85; }
-.card-img-fallback .fb-hint { font-size: 11px; opacity: .55; margin-top: 4px; }
-
-.card-img-grad { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.4) 0%, transparent 30%, transparent 60%, rgba(0,0,0,.5) 100%); pointer-events: none; }
-.card-badges-tl { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; flex-direction: column; align-items: flex-end; }
-.card-badges-tr { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; flex-direction: column; align-items: flex-start; }
-.card-badge {
-  font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px;
-  letter-spacing: .3px; box-shadow: 0 2px 6px rgba(0,0,0,.15);
-  display: inline-flex; align-items: center; gap: 4px;
+.fb-num { font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -1px; opacity: 0.95; }
+.fb-street { font-size: 13px; font-weight: 500; opacity: 0.85; }
+.apt-image-wrap.has-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,.35) 100%);
+  pointer-events: none;
 }
-.card-badge.new { background: var(--good); color: #fff; }
-.card-badge.new::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: pulse-dot 1.5s ease-in-out infinite; }
-.card-badge.drop { background: var(--bad); color: #fff; }
-.card-badge.hot { background: var(--hot); color: #fff; }
-.card-badge.fresh { background: rgba(255,255,255,.95); color: var(--ink); backdrop-filter: blur(6px); }
-.card-price-tl { position: absolute; bottom: 10px; right: 10px; }
-.card-price-block { background: rgba(20,17,13,.86); color: #fff; padding: 6px 12px; border-radius: var(--radius-sm); backdrop-filter: blur(6px); }
-.card-price-block .price-now { font-size: 18px; font-weight: 800; letter-spacing: -.5px; }
-.card-price-block .price-old { font-size: 11px; opacity: .65; text-decoration: line-through; margin-right: 6px; }
 
-.card-body { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
-.card-addr { font-size: 16px; font-weight: 700; line-height: 1.25; letter-spacing: -.2px; }
-.card-meta { font-size: 12px; color: var(--ink-3); margin-top: -2px; }
-.card-specs { display: flex; gap: var(--space-3); font-size: 13px; color: var(--ink-2); margin-top: 4px; }
-.card-specs span b { color: var(--ink); font-weight: 700; }
-.card-specs .dot { color: var(--ink-4); }
-
-.value-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
-  margin-top: 4px; align-self: flex-start;
+.badges-row {
+  position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; flex-wrap: wrap; max-width: calc(100% - 56px);
+  z-index: 2;
 }
-.value-badge.steal { background: var(--good-bg-strong); color: var(--good); }
-.value-badge.fair { background: var(--surface-2); color: var(--ink-2); }
-.value-badge.pricey { background: var(--bad-bg); color: var(--bad); }
-
-.feat-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
-.feat {
-  font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+.badge {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 99px;
+  color: white;
   display: inline-flex; align-items: center; gap: 3px;
 }
-.feat.has { background: var(--good-bg); color: var(--good); }
-.feat.miss { background: var(--surface-2); color: var(--ink-3); }
+.badge-new     { background: var(--green); }
+.badge-drop    { background: var(--red); }
+.badge-private { background: var(--amber); }
+.badge-hot     { background: oklch(58% 0.16 35); }
+.badge-time {
+  background: rgba(255,255,255,0.92); color: var(--text);
+  backdrop-filter: blur(4px);
+}
 
-.card-footer {
-  border-top: 1px solid var(--border); padding: var(--space-3) var(--space-4);
-  display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
-  font-size: 12px; color: var(--ink-3); background: var(--surface);
+.save-btn {
+  position: absolute; top: 10px; left: 10px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; border: none; cursor: pointer;
+  backdrop-filter: blur(4px);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+  color: var(--text-2);
+  z-index: 2;
 }
-.card-source { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; }
-.source-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.source-dot.private { background: var(--good); }
-.source-dot.commercial { background: var(--ink-4); }
-.card-source .src-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
-.card-actions { display: flex; gap: 2px; }
-.icon-btn {
-  background: none; border: none; padding: 6px; border-radius: 6px;
-  color: var(--ink-3); transition: all .15s; line-height: 0;
+.save-btn:hover { transform: scale(1.06); }
+.save-btn.saved { background: var(--red); color: white; }
+
+.apt-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+.apt-price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.apt-price {
+  font-size: 22px; font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  line-height: 1;
 }
-.icon-btn:hover { background: var(--surface-2); color: var(--ink); }
-.icon-btn.active.save { color: #d4af37; background: rgba(212,175,55,.12); }
-.icon-btn.active.dismiss { color: var(--bad); }
-.icon-btn.active.seen { color: var(--info); }
-.card-cta {
-  background: var(--ink); color: #fff; border: none; padding: 6px 12px;
-  border-radius: var(--radius-sm); font-size: 12px; font-weight: 700;
+.apt-price-old {
+  font-size: 13px; color: var(--text-3);
+  text-decoration: line-through;
+  font-weight: 500;
+}
+.apt-ppm {
+  font-size: 12px; color: var(--text-3);
+  background: var(--surface2);
+  padding: 2px 8px; border-radius: 99px;
+  border: 1px solid var(--border);
+  margin-right: auto;
+}
+.value-pill {
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 99px;
+}
+.value-pill.steal { background: var(--green-light); color: var(--green); }
+.value-pill.fair { background: var(--surface2); color: var(--text-3); border: 1px solid var(--border); }
+.value-pill.pricey { background: var(--red-light); color: var(--red); }
+
+.apt-address { font-size: 14px; font-weight: 500; color: var(--text-2); }
+.apt-details { display: flex; gap: 12px; font-size: 13px; color: var(--text-2); }
+.apt-details span b { color: var(--text); font-weight: 700; }
+.apt-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
+.apt-tag {
+  font-size: 11px;
+  padding: 2px 9px; border-radius: 99px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+.apt-tag.has { background: var(--green-light); color: var(--green); border-color: oklch(80% 0.06 155); }
+
+.apt-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.apt-date { font-size: 12px; color: var(--text-3); }
+.apt-actions { display: flex; gap: 4px; align-items: center; }
+.apt-seen-btn {
+  font-size: 12px; color: var(--accent); font-weight: 500;
+  background: none; border: none;
   display: inline-flex; align-items: center; gap: 4px;
 }
-.card-cta:hover { background: #2a2520; text-decoration: none; color: #fff; }
-
-/* SCAN MODE — compact rows */
-.scan-mode .grid { grid-template-columns: 1fr; gap: 4px; }
-.scan-mode .card { flex-direction: row; align-items: stretch; }
-.scan-mode .card-img { width: 80px; aspect-ratio: 1; flex-shrink: 0; }
-.scan-mode .card-badges-tl, .scan-mode .card-badges-tr, .scan-mode .card-price-tl, .scan-mode .card-img-grad { display: none; }
-.scan-mode .card-img-fallback { padding: 6px; }
-.scan-mode .card-img-fallback .fb-num { font-size: 18px; }
-.scan-mode .card-img-fallback .fb-street, .scan-mode .card-img-fallback .fb-hint { display: none; }
-.scan-mode .card-body { flex: 1; padding: var(--space-2) var(--space-3); display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr) auto; align-items: center; gap: var(--space-3); }
-.scan-mode .card-addr { font-size: 14px; }
-.scan-mode .card-meta, .scan-mode .feat-row { display: none; }
-.scan-mode .card-specs { font-size: 12px; }
-.scan-mode .scan-price { font-size: 16px; font-weight: 800; color: var(--ink); }
-.scan-mode .card-footer { display: none; }
-
-/* SIDEBAR */
-.sidebar { display: flex; flex-direction: column; gap: var(--space-4); }
-.sb-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: var(--space-4); box-shadow: var(--shadow-sm);
+.apt-seen-btn.seen { color: var(--text-3); }
+.apt-open {
+  background: var(--accent); color: white;
+  padding: 4px 12px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
 }
-.sb-title { font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: var(--space-3); }
-.sb-stat { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-.sb-stat:last-child { border-bottom: none; }
-.sb-stat .lbl { color: var(--ink-3); }
-.sb-stat .val { font-weight: 700; }
-.sb-stat .val.good { color: var(--good); }
-.sb-stat .val.bad { color: var(--bad); }
-.trend-spark { font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-right: 4px; }
-.trend-spark.up { background: var(--bad-bg); color: var(--bad); }
-.trend-spark.dn { background: var(--good-bg); color: var(--good); }
-.saved-list .empty-mini { color: var(--ink-3); font-size: 12px; padding: var(--space-2) 0; }
-.saved-row {
-  display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border);
-  font-size: 13px; align-items: center;
-}
-.saved-row:last-child { border-bottom: none; }
-.saved-row .heart { color: #d4af37; flex-shrink: 0; }
-.saved-row .info { flex: 1; min-width: 0; }
-.saved-row .info .a { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.saved-row .info .p { font-size: 11px; color: var(--ink-3); }
+.apt-open:hover { background: var(--accent-dark); text-decoration: none; color: white; }
 
-/* HISTORY */
-.history { display: flex; flex-direction: column; gap: 0; max-width: 920px; margin: 0 auto; }
+/* ============== HISTORY TAB ============== */
+.history-list { display: flex; flex-direction: column; gap: 0; }
 .ev {
   background: var(--surface); border: 1px solid var(--border); border-bottom: none;
-  padding: var(--space-3) var(--space-4); display: flex; gap: var(--space-3); align-items: flex-start;
+  padding: 14px 18px; display: flex; gap: 14px; align-items: flex-start;
 }
-.ev:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-.ev:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); border-bottom: 1px solid var(--border); }
-.ev:only-child { border-radius: var(--radius-lg); }
+.ev:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+.ev:last-child { border-radius: 0 0 var(--radius) var(--radius); border-bottom: 1px solid var(--border); }
+.ev:only-child { border-radius: var(--radius); }
 .ev-icon {
   width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; font-size: 18px;
 }
-.ev.added .ev-icon { background: var(--good-bg); color: var(--good); }
-.ev.removed .ev-icon { background: var(--bad-bg); color: var(--bad); }
-.ev.price_dropped .ev-icon { background: var(--good-bg); color: var(--good); }
-.ev.price_raised .ev-icon { background: var(--bad-bg); color: var(--bad); }
+.ev.added .ev-icon { background: var(--green-light); color: var(--green); }
+.ev.removed .ev-icon { background: var(--red-light); color: var(--red); }
+.ev.price_dropped .ev-icon { background: var(--green-light); color: var(--green); }
+.ev.price_raised .ev-icon { background: var(--red-light); color: var(--red); }
 .ev-text { flex: 1; min-width: 0; }
-.ev-when { font-size: 12px; color: var(--ink-3); }
-.ev-when b { color: var(--ink); font-weight: 700; }
+.ev-when { font-size: 12px; color: var(--text-3); }
+.ev-when b { color: var(--text); font-weight: 700; }
 .ev-what { font-size: 14px; margin-top: 2px; }
 .ev-what b { font-weight: 700; }
-.ev-what .price-old { color: var(--ink-3); text-decoration: line-through; }
-.ev-what .price-now { color: var(--info); font-weight: 700; }
+.ev-what .price-old { color: var(--text-3); text-decoration: line-through; }
+.ev-what .price-now { color: var(--accent); font-weight: 700; }
 
-/* MAP */
-#map-view { height: 600px; border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; }
-.leaflet-container { font-family: var(--font); }
+/* ============== MAP ============== */
+#map-view { height: 600px; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+.leaflet-container { font-family: 'Assistant', sans-serif; }
 .map-pin {
-  background: var(--ink); color: #fff; padding: 4px 8px; border-radius: 6px;
-  font-weight: 800; font-size: 13px; white-space: nowrap;
+  background: var(--text); color: #fff; padding: 4px 8px; border-radius: 6px;
+  font-weight: 700; font-size: 13px; white-space: nowrap;
   box-shadow: 0 2px 8px rgba(0,0,0,.25); border: 2px solid #fff;
 }
-.map-pin.is-new { background: var(--good); }
-.map-pin.is-saved { background: #d4af37; }
+.map-pin.is-new { background: var(--green); }
+.map-pin.is-saved { background: var(--red); }
 
-/* EMPTY */
+/* ============== EMPTY ============== */
 .empty {
-  text-align: center; padding: var(--space-12) var(--space-5); color: var(--ink-3);
-  background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg);
+  text-align: center; padding: 56px 20px; color: var(--text-3);
+  background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius);
 }
-.empty h3 { font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 var(--space-2); }
-.empty p { margin: 0; font-size: 14px; }
+.empty h3 { font-size: 17px; font-weight: 700; color: var(--text); margin: 0 0 6px; }
+.empty p { margin: 0; font-size: 13px; }
 
-/* KEYBOARD SHORTCUTS */
-.kbd {
-  display: inline-block; background: var(--surface-2); border: 1px solid var(--border-strong);
-  border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; font-size: 11px;
-  font-family: 'SF Mono', monospace; font-weight: 600; color: var(--ink-2);
+/* ============== KEYBOARD HINTS ============== */
+.keyboard-hints {
+  margin-top: 24px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; gap: 20px; flex-wrap: wrap;
 }
+kbd {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-family: monospace;
+}
+.hint { font-size: 12px; color: var(--text-3); display: flex; gap: 5px; align-items: center; }
 
-/* TOAST */
+/* ============== TOAST ============== */
 .toast {
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-  background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 999px;
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px;
   font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg);
-  opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
   z-index: 1000;
 }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.show { opacity: 1; }
 
-@media (max-width: 600px) {
-  .topbar-inner { padding: var(--space-3); }
-  .stats-strip { gap: var(--space-3); }
-  .filterbar { padding: var(--space-3); }
-  .filterbar-inner { gap: var(--space-3); }
-  .main { padding: var(--space-3); }
-  .grid { grid-template-columns: 1fr; }
-  .stat-num { font-size: 16px; }
-  .brand-title { font-size: 15px; }
-  .range-wrap { min-width: 220px; }
+/* ============== SCROLLBAR ============== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+/* ============== RESPONSIVE ============== */
+@media (max-width: 980px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .sidebar { position: static; width: 100%; }
+  .stats-panel { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  header { padding: 0 14px; gap: 10px; }
+  .brand-info { display: none; }
+  .header-stats { gap: 0; }
+  .header-stat { padding: 0 8px; }
+  .main-container { padding: 14px; }
+  .apartments-grid { grid-template-columns: 1fr; }
+  .stats-panel { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-card { padding: 10px 12px; }
+  .stat-value { font-size: 22px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ============== TOP BAR ============== -->
-<header class="topbar">
-  <div class="topbar-inner">
-    <div class="brand">
-      <div class="brand-mark">נ</div>
-      <div>
-        <div class="brand-title">מוניטור דירות</div>
-        <div class="brand-sub">נחלת יצחק · ת״א <span class="live-dot"></span> חי</div>
-      </div>
+<header>
+  <div class="brand">
+    <div class="logo-icon">נ</div>
+    <div class="brand-info">
+      <div class="logo-title">מוניטור דירות</div>
+      <div class="logo-subtitle">נחלת יצחק · ת״א</div>
     </div>
-    <div class="stats-strip">
-      <div class="stat"><div class="stat-num" id="s-active">—</div><div class="stat-lbl">דירות פעילות</div></div>
-      <div class="stat"><div class="stat-num good" id="s-new">—</div><div class="stat-lbl">חדשות (24ש)</div></div>
-      <div class="stat"><div class="stat-num hot" id="s-drops">—</div><div class="stat-lbl">ירידות מחיר</div></div>
-      <div class="stat"><div class="stat-num" id="s-median">—</div><div class="stat-lbl">חציון ₪/מ״ר</div></div>
-      <div class="stat"><div class="stat-num" id="s-updated">—</div><div class="stat-lbl">עודכן</div></div>
+  </div>
+  <div class="live-wrap">
+    <span class="live-dot"></span>
+    <span class="live-label">חי</span>
+  </div>
+  <div class="header-stats">
+    <div class="header-stat">
+      <div class="header-stat-value" id="hs-active">—</div>
+      <div class="header-stat-label">פעילות</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-value green" id="hs-new">—</div>
+      <div class="header-stat-label">חדשות 24ש</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-value amber" id="hs-saved">—</div>
+      <div class="header-stat-label">שמורים</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-value" id="hs-updated">—</div>
+      <div class="header-stat-label">עודכן</div>
     </div>
   </div>
 </header>
 
-<!-- ============== TABS ============== -->
-<nav class="tabs">
-  <div class="tabs-inner">
-    <button class="tab active" data-tab="active">דירות פעילות <span class="badge" id="b-active">0</span></button>
-    <button class="tab" data-tab="saved">שמורים <span class="badge" id="b-saved">0</span></button>
-    <button class="tab" data-tab="history">היסטוריה <span class="badge" id="b-history">0</span></button>
-  </div>
-</nav>
-
-<!-- ============== FILTER BAR (active only) ============== -->
-<section class="filterbar" id="filterbar">
-  <div class="filterbar-inner">
-    <div class="filter-group">
-      <span class="filter-label">מחיר חודשי</span>
-      <div class="range-wrap">
-        <input type="range" id="price-min" min="6000" max="14000" step="100" value="8000">
-        <input type="range" id="price-max" min="6000" max="14000" step="100" value="12000">
-        <div class="range-vals"><span id="pmin-v">8,000</span><em>—</em><span id="pmax-v">12,000</span></div>
-      </div>
+<div class="main-container">
+  <!-- STATS PANEL -->
+  <div class="stats-panel">
+    <div class="stat-card accent">
+      <div class="stat-label">דירות תואמות</div>
+      <div class="stat-value" id="sp-active">—</div>
+      <div class="stat-sub">3-4 חד׳ · ממ"ד · 8-12K</div>
     </div>
-    <div class="filter-group">
-      <span class="filter-label">חדרים</span>
-      <div class="toggle-group" id="rooms-tg">
-        <button class="toggle-pill active" data-r="all">הכל</button>
-        <button class="toggle-pill" data-r="3">3</button>
-        <button class="toggle-pill" data-r="3.5">3.5</button>
-        <button class="toggle-pill" data-r="4">4</button>
-      </div>
+    <div class="stat-card">
+      <div class="stat-label">חציון מחיר</div>
+      <div class="stat-value" id="sp-median">—</div>
+      <div class="stat-sub">בשכונה כרגע</div>
     </div>
-    <div class="filter-group">
-      <span class="filter-label">מאפיינים</span>
-      <div class="chip-group" id="feat-chips">
-        <button class="chip" data-c="parking">חניה</button>
-        <button class="chip" data-c="balcony">מרפסת</button>
-        <button class="chip" data-c="elevator">מעלית</button>
-        <button class="chip" data-c="private">בעלים פרטי</button>
-      </div>
+    <div class="stat-card">
+      <div class="stat-label">חציון ₪/מ״ר</div>
+      <div class="stat-value" id="sp-ppm">—</div>
+      <div class="stat-sub">בסיס לחישוב שווי</div>
     </div>
-    <div class="filter-group">
-      <span class="filter-label">דחיפות</span>
-      <div class="chip-group">
-        <button class="chip good" data-c="newonly">🆕 חדשות בלבד</button>
-        <button class="chip danger" data-c="droponly">↓ ירדו במחיר</button>
-        <button class="chip" data-c="hideseen">הסתר ראיתי</button>
-      </div>
+    <div class="stat-card">
+      <div class="stat-label">השבוע</div>
+      <div class="stat-value" id="sp-week">—</div>
+      <div class="stat-sub" id="sp-week-sub">—</div>
     </div>
   </div>
-</section>
 
-<!-- ============== SORT BAR (active only) ============== -->
-<section class="sortbar" id="sortbar">
-  <div class="sortbar-inner">
-    <button class="sort-pill active" data-s="hot">🔥 הכי שווה</button>
-    <button class="sort-pill" data-s="newest">🆕 הכי חדש</button>
-    <button class="sort-pill" data-s="cheapest">💰 זול לחדש</button>
-    <button class="sort-pill" data-s="biggest">📐 גדול לקטן</button>
-    <button class="sort-pill" data-s="value">⚡ שווי-תמורה</button>
-    <button class="scan-toggle" id="scan-btn" title="הצג כרטיסים מצומצמים — מקש S">⌫ סריקה מהירה <span class="kbd">S</span></button>
-    <div class="view-switcher">
-      <button class="active" data-v="grid">⊞ כרטיסים</button>
-      <button data-v="map">🗺 מפה</button>
+  <!-- TABS -->
+  <nav class="tabs">
+    <button class="tab active" data-tab="active">דירות פעילות <span class="tab-badge" id="b-active">0</span></button>
+    <button class="tab" data-tab="saved">שמורים <span class="tab-badge" id="b-saved">0</span></button>
+    <button class="tab" data-tab="history">היסטוריה <span class="tab-badge" id="b-history">0</span></button>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content-grid">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="filter-section">
+        <div class="filter-section-title">חדרים</div>
+        <div class="chip-group" id="rooms-chips">
+          <button class="chip active" data-r="all">הכל</button>
+          <button class="chip" data-r="3">3</button>
+          <button class="chip" data-r="3.5">3.5</button>
+          <button class="chip" data-r="4">4</button>
+        </div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-title">מחיר חודשי (₪)</div>
+        <div class="price-inputs">
+          <input type="number" class="price-input" id="price-min" min="6000" max="14000" step="100" value="8000">
+          <span class="price-sep">—</span>
+          <input type="number" class="price-input" id="price-max" min="6000" max="14000" step="100" value="12000">
+        </div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-title">מאפיינים</div>
+        <div class="chip-group" id="feat-chips">
+          <button class="chip" data-c="parking">חניה</button>
+          <button class="chip" data-c="balcony">מרפסת</button>
+          <button class="chip" data-c="elevator">מעלית</button>
+          <button class="chip" data-c="private">בעלים פרטי</button>
+        </div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-title">דחיפות</div>
+        <label class="checkbox-row"><input type="checkbox" id="cb-newonly"> חדשות בלבד (24ש)</label>
+        <label class="checkbox-row"><input type="checkbox" id="cb-droponly"> ירדו במחיר</label>
+        <label class="checkbox-row"><input type="checkbox" id="cb-hideseen"> הסתר ראיתי</label>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-title">השבוע (7 ימים)</div>
+        <div class="sidebar-mini-stats">
+          <div class="mini-stat"><span class="lbl">דירות חדשות</span><span class="val green" id="ms-added">—</span></div>
+          <div class="mini-stat"><span class="lbl">ירידות מחיר</span><span class="val green" id="ms-drops">—</span></div>
+          <div class="mini-stat"><span class="lbl">העלאות מחיר</span><span class="val red" id="ms-raises">—</span></div>
+          <div class="mini-stat"><span class="lbl">ירדו מהאוויר</span><span class="val" id="ms-removed">—</span></div>
+        </div>
+      </div>
+      <button class="reset-btn" id="reset-btn">איפוס פילטרים</button>
+    </aside>
+
+    <!-- MAIN -->
+    <div>
+      <div class="toolbar" id="toolbar">
+        <button class="sort-pill active" data-s="hot">🔥 הכי שווה</button>
+        <button class="sort-pill" data-s="newest">🆕 חדש</button>
+        <button class="sort-pill" data-s="cheapest">💰 זול</button>
+        <button class="sort-pill" data-s="biggest">📐 גדול</button>
+        <button class="sort-pill" data-s="value">⚡ שווי</button>
+        <div class="view-toggle">
+          <button class="active" data-v="grid">⊞ כרטיסים</button>
+          <button data-v="map">🗺 מפה</button>
+        </div>
+      </div>
+
+      <section id="tab-active">
+        <div id="grid" class="apartments-grid"></div>
+        <div id="empty-active" class="empty" style="display:none;">
+          <h3>אין דירות בפילטר הנוכחי</h3>
+          <p>נסה לאפס את הפילטרים, או חכה — דירות חדשות יתווספו אוטומטית כל 15 דק׳.</p>
+        </div>
+        <div id="map-view" style="display:none;"></div>
+      </section>
+
+      <section id="tab-saved" style="display:none;">
+        <div id="saved-grid" class="apartments-grid"></div>
+        <div id="empty-saved" class="empty" style="display:none;">
+          <h3>אין דירות שמורות</h3>
+          <p>לחץ על ❤ בכרטיס דירה כדי לשמור אותו.</p>
+        </div>
+      </section>
+
+      <section id="tab-history" style="display:none;">
+        <div id="history" class="history-list"></div>
+        <div id="empty-history" class="empty" style="display:none;">
+          <h3>עדיין אין היסטוריה</h3>
+          <p>אירועים יופיעו כאן ברגע שתעלה דירה חדשה / מחיר ישתנה / מודעה תרד.</p>
+        </div>
+      </section>
+
+      <div class="keyboard-hints">
+        <div class="hint"><kbd>J</kbd> <kbd>K</kbd> ניווט</div>
+        <div class="hint"><kbd>Enter</kbd> פתח מודעה</div>
+        <div class="hint"><kbd>F</kbd> שמור</div>
+        <div class="hint"><kbd>X</kbd> הסתר</div>
+        <div class="hint"><kbd>S</kbd> סריקה מהירה</div>
+      </div>
     </div>
   </div>
-</section>
-
-<!-- ============== MAIN ============== -->
-<div class="main">
-  <aside class="sidebar" id="sidebar">
-    <div class="sb-card">
-      <div class="sb-title">סטטיסטיקות שכונה</div>
-      <div class="sb-stat"><span class="lbl">מחיר חציוני</span><span class="val" id="sb-median-price">—</span></div>
-      <div class="sb-stat"><span class="lbl">₪/מ״ר חציוני</span><span class="val" id="sb-median-ppm">—</span></div>
-      <div class="sb-stat"><span class="lbl">הזולה ביותר</span><span class="val good" id="sb-cheapest">—</span></div>
-      <div class="sb-stat"><span class="lbl">היקרה ביותר</span><span class="val bad" id="sb-priciest">—</span></div>
-    </div>
-    <div class="sb-card">
-      <div class="sb-title">השבוע (7 ימים)</div>
-      <div class="sb-stat"><span class="lbl">דירות חדשות</span><span class="val good" id="sb-week-added">—</span></div>
-      <div class="sb-stat"><span class="lbl">ירידות מחיר</span><span class="val good" id="sb-week-drops">—</span></div>
-      <div class="sb-stat"><span class="lbl">העלאות מחיר</span><span class="val bad" id="sb-week-raises">—</span></div>
-      <div class="sb-stat"><span class="lbl">מודעות שירדו</span><span class="val" id="sb-week-removed">—</span></div>
-    </div>
-    <div class="sb-card">
-      <div class="sb-title">קיצורי מקלדת</div>
-      <div style="font-size: 12px; color: var(--ink-2); display: flex; flex-direction: column; gap: 6px;">
-        <div><span class="kbd">J</span> <span class="kbd">K</span> ניווט בין כרטיסים</div>
-        <div><span class="kbd">S</span> סריקה מהירה</div>
-        <div><span class="kbd">F</span> שמירה (מועדף)</div>
-        <div><span class="kbd">X</span> דחייה</div>
-        <div><span class="kbd">Enter</span> פתיחת מודעה</div>
-        <div><span class="kbd">/</span> חיפוש</div>
-      </div>
-    </div>
-  </aside>
-  <div class="content-wrap">
-    <!-- Tab: Active -->
-    <section id="tab-active">
-      <div id="grid" class="grid"></div>
-      <div id="empty-active" class="empty" style="display:none;">
-        <h3>אין דירות בפילטר הנוכחי</h3>
-        <p>הסר חלק מהפילטרים, או חכה — דירות חדשות יתווספו אוטומטית.</p>
-      </div>
-      <div id="map-view" style="display:none;"></div>
-    </section>
-    <!-- Tab: Saved -->
-    <section id="tab-saved" style="display:none;">
-      <div id="saved-grid" class="grid"></div>
-      <div id="empty-saved" class="empty" style="display:none;">
-        <h3>אין דירות שמורות</h3>
-        <p>לחץ על ❤ בכרטיס דירה כדי לשמור אותו לעיון מאוחר יותר.</p>
-      </div>
-    </section>
-    <!-- Tab: History -->
-    <section id="tab-history" style="display:none;">
-      <div id="history" class="history"></div>
-      <div id="empty-history" class="empty" style="display:none;">
-        <h3>עדיין אין היסטוריה</h3>
-        <p>אירועים יופיעו כאן ברגע שתעלה דירה חדשה / מחיר ישתנה / מודעה תרד.</p>
-      </div>
-    </section>
-  </div>
-
-  <!-- Sidebar -->
-  
 </div>
 
 <div class="toast" id="toast">שמור</div>
@@ -558,22 +688,19 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 
 <script>
 'use strict';
 
-/* ============== DATA (injected by deploy.py) ============== */
 const DATA = {"updated":"2026-04-29T07:13:34+00:00","items":[{"token":"yged1jp3","url":"https://www.yad2.co.il/realestate/item/yged1jp3","street":"תוצרת הארץ","house_number":5,"floor":3,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":104,"price":8500,"price_before":null,"ad_type":"private","agency":null,"tags":[],"image":"","score":1,"has_mamad":true,"has_parking":false,"has_balcony":false},{"token":"1ehxn87g","url":"https://www.yad2.co.il/realestate/item/1ehxn87g","street":"תוצרת הארץ","house_number":null,"floor":21,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":4,"sqm":107,"price":10000,"price_before":null,"ad_type":"commercial","agency":"עד המפתח - תיווך ושיווק נדל\"ן","tags":[],"image":"https://img.yad2.co.il/Pic/202604/28/2_6/o/y2_1pa_010567_20260428092432.jpeg","score":1,"has_mamad":true,"has_parking":false,"has_balcony":false},{"token":"fxidva6i","url":"https://www.yad2.co.il/realestate/item/fxidva6i","street":"תוצרת הארץ","house_number":5,"floor":21,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":4,"sqm":115,"price":11000,"price_before":null,"ad_type":"private","agency":null,"tags":[],"image":"","score":1,"has_mamad":true,"has_parking":false,"has_balcony":false},{"token":"sb6sbv1i","url":"https://www.yad2.co.il/realestate/item/sb6sbv1i","street":"תוצרת הארץ","house_number":5,"floor":24,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":4,"sqm":130,"price":12000,"price_before":null,"ad_type":"commercial","agency":"אידלסון נכסים","tags":[],"image":"https://img.yad2.co.il/Pic/202603/22/2_6/o/y2_1pa_010239_20260322162212.jpeg","score":1,"has_mamad":true,"has_parking":false,"has_balcony":false},{"token":"bb6d6ltv","url":"https://www.yad2.co.il/realestate/item/bb6d6ltv","street":"תוצרת הארץ","house_number":3,"floor":32,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":86,"price":8500,"price_before":null,"ad_type":"commercial","agency":"Real Estate Solutions","tags":[],"image":"https://img.yad2.co.il/Pic/202510/05/2_6/o/y2_1pa_998878_20251005011931.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false},{"token":"hmxz4agc","url":"https://www.yad2.co.il/realestate/item/hmxz4agc","street":"תוצרת הארץ","house_number":3,"floor":22,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":86,"price":8500,"price_before":null,"ad_type":"commercial","agency":"Real Estate Solutions","tags":[],"image":"https://img.yad2.co.il/Pic/202510/05/2_6/o/y2_1pa_991002_20251005012954.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false},{"token":"7cvxh8qc","url":"https://www.yad2.co.il/realestate/item/7cvxh8qc","street":"תוצרת הארץ","house_number":5,"floor":33,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":86,"price":8600,"price_before":null,"ad_type":"commercial","agency":"אור תיווך יזמות ושיווק נדל\"ן","tags":[],"image":"https://img.yad2.co.il/Pic/202603/26/2_6/o/y2_1pa_010556_20260326150203.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false},{"token":"meb9oa82","url":"https://www.yad2.co.il/realestate/item/meb9oa82","street":"ערבי נחל","house_number":20,"floor":2,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":85,"price":9500,"price_before":null,"ad_type":"private","agency":null,"tags":[],"image":"https://img.yad2.co.il/Pic/202604/16/2_2/o/y2_1pa_010490_20260416161513.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false},{"token":"skskxckg","url":"https://www.yad2.co.il/realestate/item/skskxckg","street":"תוצרת הארץ","house_number":null,"floor":17,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":94,"price":9700,"price_before":null,"ad_type":"commercial","agency":"פאר תיווך נכסים","tags":[],"image":"https://img.yad2.co.il/Pic/202602/19/2_6/o/y2_1pa_010096_20260219153454.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false}]};
 const NEW_TOKENS = ["meb9oa82", "bb6d6ltv", "sb6sbv1i", "7cvxh8qc", "fxidva6i", "yged1jp3", "hmxz4agc", "skskxckg", "1ehxn87g"];
 const HISTORY = [{"ts":"2026-04-29T07:13:34+00:00","type":"added","item":{"token":"meb9oa82","url":"https://www.yad2.co.il/realestate/item/meb9oa82","street":"ערבי נחל","house_number":20,"floor":2,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":85,"price":9500,"price_before":null,"ad_type":"private","agency":null,"tags":[],"image":"https://img.yad2.co.il/Pic/202604/16/2_2/o/y2_1pa_010490_20260416161513.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false},"old_price":null,"new_price":null},{"ts":"2026-04-29T07:13:34+00:00","type":"added","item":{"token":"bb6d6ltv","url":"https://www.yad2.co.il/realestate/item/bb6d6ltv","street":"תוצרת הארץ","house_number":3,"floor":32,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":86,"price":8500,"price_before":null,"ad_type":"commercial","agency":"Real Estate Solutions","tags":[],"image":"https://img.yad2.co.il/Pic/202510/05/2_6/o/y2_1pa_998878_20251005011931.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false},"old_price":null,"new_price":null},{"ts":"2026-04-29T07:13:34+00:00","type":"added","item":{"token":"sb6sbv1i","url":"https://www.yad2.co.il/realestate/item/sb6sbv1i","street":"תוצרת הארץ","house_number":5,"floor":24,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":4,"sqm":130,"price":12000,"price_before":null,"ad_type":"commercial","agency":"אידלסון נכסים","tags":[],"image":"https://img.yad2.co.il/Pic/202603/22/2_6/o/y2_1pa_010239_20260322162212.jpeg","score":1,"has_mamad":true,"has_parking":false,"has_balcony":false},"old_price":null,"new_price":null},{"ts":"2026-04-29T07:13:34+00:00","type":"added","item":{"token":"7cvxh8qc","url":"https://www.yad2.co.il/realestate/item/7cvxh8qc","street":"תוצרת הארץ","house_number":5,"floor":33,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":86,"price":8600,"price_before":null,"ad_type":"commercial","agency":"אור תיווך יזמות ושיווק נדל\"ן","tags":[],"image":"https://img.yad2.co.il/Pic/202603/26/2_6/o/y2_1pa_010556_20260326150203.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false},"old_price":null,"new_price":null},{"ts":"2026-04-29T07:13:34+00:00","type":"added","item":{"token":"fxidva6i","url":"https://www.yad2.co.il/realestate/item/fxidva6i","street":"תוצרת הארץ","house_number":5,"floor":21,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":4,"sqm":115,"price":11000,"price_before":null,"ad_type":"private","agency":null,"tags":[],"image":"","score":1,"has_mamad":true,"has_parking":false,"has_balcony":false},"old_price":null,"new_price":null},{"ts":"2026-04-29T07:13:34+00:00","type":"added","item":{"token":"yged1jp3","url":"https://www.yad2.co.il/realestate/item/yged1jp3","street":"תוצרת הארץ","house_number":5,"floor":3,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":104,"price":8500,"price_before":null,"ad_type":"private","agency":null,"tags":[],"image":"","score":1,"has_mamad":true,"has_parking":false,"has_balcony":false},"old_price":null,"new_price":null},{"ts":"2026-04-29T07:13:34+00:00","type":"added","item":{"token":"hmxz4agc","url":"https://www.yad2.co.il/realestate/item/hmxz4agc","street":"תוצרת הארץ","house_number":3,"floor":22,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":86,"price":8500,"price_before":null,"ad_type":"commercial","agency":"Real Estate Solutions","tags":[],"image":"https://img.yad2.co.il/Pic/202510/05/2_6/o/y2_1pa_991002_20251005012954.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false},"old_price":null,"new_price":null},{"ts":"2026-04-29T07:13:34+00:00","type":"added","item":{"token":"skskxckg","url":"https://www.yad2.co.il/realestate/item/skskxckg","street":"תוצרת הארץ","house_number":null,"floor":17,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":3,"sqm":94,"price":9700,"price_before":null,"ad_type":"commercial","agency":"פאר תיווך נכסים","tags":[],"image":"https://img.yad2.co.il/Pic/202602/19/2_6/o/y2_1pa_010096_20260219153454.jpeg","score":0,"has_mamad":true,"has_parking":false,"has_balcony":false},"old_price":null,"new_price":null},{"ts":"2026-04-29T07:13:34+00:00","type":"added","item":{"token":"1ehxn87g","url":"https://www.yad2.co.il/realestate/item/1ehxn87g","street":"תוצרת הארץ","house_number":null,"floor":21,"neighborhood":"נחלת יצחק","city":"תל אביב יפו","rooms":4,"sqm":107,"price":10000,"price_before":null,"ad_type":"commercial","agency":"עד המפתח - תיווך ושיווק נדל\"ן","tags":[],"image":"https://img.yad2.co.il/Pic/202604/28/2_6/o/y2_1pa_010567_20260428092432.jpeg","score":1,"has_mamad":true,"has_parking":false,"has_balcony":false},"old_price":null,"new_price":null}];
 
-/* ============== STATE ============== */
 const ls = {
   get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
   set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
-const seenSet  = new Set(ls.get('seen', []));
+const seenSet = new Set(ls.get('seen', []));
 const savedSet = new Set(ls.get('saved', []));
 const dismissedSet = new Set(ls.get('dismissed', []));
 const newSet = new Set(NEW_TOKENS);
 
-/* ============== HELPERS ============== */
 const $ = id => document.getElementById(id);
 const fmt = n => n != null ? Number(n).toLocaleString('he-IL') : '—';
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -588,258 +715,152 @@ function timeAgo(iso) {
 }
 function isFresh24h(iso) { return iso && (Date.now() - new Date(iso).getTime()) < 86400*1000; }
 function median(arr) {
-  const s = [...arr].sort((a,b) => a-b);
+  const s = [...arr].sort((a,b)=>a-b);
   if (!s.length) return null;
-  return s.length % 2 ? s[(s.length-1)/2] : (s[s.length/2-1] + s[s.length/2]) / 2;
+  return s.length%2 ? s[(s.length-1)/2] : (s[s.length/2-1]+s[s.length/2])/2;
 }
 function showToast(msg) {
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(t._tm); t._tm = setTimeout(()=> t.classList.remove('show'), 1500);
 }
 
-/* ============== COMPUTE DERIVED FIELDS ============== */
+/* derived fields */
+DATA.items.forEach(it => { it.ppm = (it.sqm && it.price) ? Math.round(it.price/it.sqm) : null; });
+const medianPpm = median(DATA.items.map(i => i.ppm).filter(Boolean));
 DATA.items.forEach(it => {
-  it.ppm = (it.sqm && it.price) ? Math.round(it.price / it.sqm) : null;
-});
-const allPpm = DATA.items.map(i => i.ppm).filter(Boolean);
-const medianPpm = median(allPpm);
-DATA.items.forEach(it => {
-  if (it.ppm && medianPpm) {
-    const dev = (it.ppm - medianPpm) / medianPpm;  // -ve = cheap, +ve = expensive
-    it.value_pct = Math.round(dev * 100);  // % deviation from median
-  }
-  // Hot = either fresh OR steal (>=8% below median)
+  if (it.ppm && medianPpm) it.value_pct = Math.round((it.ppm - medianPpm)/medianPpm*100);
   it.is_steal = (it.value_pct != null && it.value_pct <= -8);
   it.is_fresh = isFresh24h(it.discovered_at);
   it.is_hot = it.is_steal || it.is_fresh || newSet.has(it.token);
-  // price drop detection from history
   const dropEv = HISTORY.find(e => e.type === 'price_dropped' && e.item && e.item.token === it.token);
   it.had_price_drop = !!dropEv;
-  if (dropEv) { it.price_was = dropEv.old_price; }
+  if (dropEv) it.price_was = dropEv.old_price;
 });
 
-/* duplicate detection: same address (street + house_number) */
-const addrCount = {};
-DATA.items.forEach(it => {
-  const key = (it.street || '') + ' ' + (it.house_number || '');
-  addrCount[key] = (addrCount[key] || 0) + 1;
-});
-DATA.items.forEach(it => {
-  const key = (it.street || '') + ' ' + (it.house_number || '');
-  it.same_building_count = addrCount[key];
-});
-
-/* ============== STATS ============== */
-function computeStats() {
-  const items = DATA.items;
-  const prices = items.map(i => i.price).filter(Boolean);
-  const ppms = items.map(i => i.ppm).filter(Boolean);
-  const fresh24 = items.filter(i => i.is_fresh).length;
-  const drops = items.filter(i => i.had_price_drop).length;
-
-  $('s-active').textContent = items.length;
-  $('s-new').textContent = fresh24;
-  $('s-drops').textContent = drops;
-  $('s-median').textContent = ppms.length ? '₪' + fmt(Math.round(medianPpm || 0)) : '—';
-  const upd = DATA.updated ? new Date(DATA.updated) : null;
-  $('s-updated').textContent = upd ? upd.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'}) : '—';
-  $('b-active').textContent = items.length;
-  $('b-saved').textContent = savedSet.size;
-  $('b-history').textContent = HISTORY.length;
-
-  // Sidebar
-  $('sb-median-price').textContent = prices.length ? fmt(Math.round(median(prices))) + ' ₪' : '—';
-  $('sb-median-ppm').textContent = ppms.length ? '₪' + fmt(Math.round(medianPpm)) + '/מ״ר' : '—';
-  if (prices.length) {
-    const sortedByPrice = [...items].filter(i=>i.price).sort((a,b) => a.price - b.price);
-    $('sb-cheapest').textContent = fmt(sortedByPrice[0].price) + ' ₪';
-    $('sb-priciest').textContent = fmt(sortedByPrice[sortedByPrice.length-1].price) + ' ₪';
-  }
-
-  // Weekly stats from history
-  const sevenDays = Date.now() - 7*86400*1000;
-  let added=0, removed=0, drops7=0, raises7=0;
-  for (const ev of HISTORY) {
-    if (!ev.ts || new Date(ev.ts).getTime() < sevenDays) continue;
-    if (ev.type === 'added') added++;
-    else if (ev.type === 'removed') removed++;
-    else if (ev.type === 'price_dropped') drops7++;
-    else if (ev.type === 'price_raised') raises7++;
-  }
-  $('sb-week-added').textContent = added;
-  $('sb-week-drops').textContent = drops7;
-  $('sb-week-raises').textContent = raises7;
-  $('sb-week-removed').textContent = removed;
-}
-
-/* ============== FILTERS / SORT STATE ============== */
-let activeRooms = 'all';
-let activeSort = 'hot';
-let activeView = 'grid';
-let scanMode = false;
+/* state */
+let activeRooms = 'all', activeSort = 'hot', activeView = 'grid';
 let priceMin = 8000, priceMax = 12000;
-const featOn = { parking: false, balcony: false, elevator: false, private: false, newonly: false, droponly: false, hideseen: false };
+const featOn = { parking: false, balcony: false, elevator: false, private: false };
+const urgency = { newonly: false, droponly: false, hideseen: false };
+let currentTab = 'active';
+let kbIdx = -1;
 
-function passesFilter(it) {
+function passes(it) {
   if (it.price < priceMin || it.price > priceMax) return false;
   if (activeRooms !== 'all' && Number(activeRooms) !== it.rooms) return false;
   if (featOn.parking && !it.has_parking) return false;
   if (featOn.balcony && !it.has_balcony) return false;
   if (featOn.elevator && !(it.tags||[]).some(t => t.includes('מעלית'))) return false;
   if (featOn.private && it.ad_type !== 'private') return false;
-  if (featOn.newonly && !it.is_fresh) return false;
-  if (featOn.droponly && !it.had_price_drop) return false;
-  if (featOn.hideseen && seenSet.has(it.token)) return false;
+  if (urgency.newonly && !it.is_fresh) return false;
+  if (urgency.droponly && !it.had_price_drop) return false;
+  if (urgency.hideseen && seenSet.has(it.token)) return false;
   if (dismissedSet.has(it.token)) return false;
   return true;
 }
-
 function sortItems(items) {
   const sorters = {
-    hot:      (a,b) => (b.is_hot - a.is_hot) || (a.value_pct||0) - (b.value_pct||0) || (a.price - b.price),
-    newest:   (a,b) => (b.discovered_at || '').localeCompare(a.discovered_at || ''),
-    cheapest: (a,b) => (a.price || 999999) - (b.price || 999999),
-    biggest:  (a,b) => (b.sqm || 0) - (a.sqm || 0),
-    value:    (a,b) => (a.value_pct || 0) - (b.value_pct || 0),
+    hot: (a,b) => (b.is_hot - a.is_hot) || ((a.value_pct||0) - (b.value_pct||0)) || (a.price - b.price),
+    newest: (a,b) => (b.discovered_at||'').localeCompare(a.discovered_at||''),
+    cheapest: (a,b) => (a.price||999999) - (b.price||999999),
+    biggest: (a,b) => (b.sqm||0) - (a.sqm||0),
+    value: (a,b) => (a.value_pct||0) - (b.value_pct||0),
   };
   return [...items].sort(sorters[activeSort]);
 }
+function visibleItems() { return sortItems(DATA.items.filter(passes)); }
 
-function visibleItems() {
-  return sortItems(DATA.items.filter(passesFilter));
-}
-
-/* ============== CARD HTML ============== */
 function addrOf(it) { return [it.street, it.house_number].filter(Boolean).join(' ') || 'כתובת חסויה'; }
-function streetInitial(s) { return (s || '?').trim()[0] || '?'; }
-
-function valueBadge(it) {
+function valueLabel(it) {
   if (it.value_pct == null) return '';
-  if (it.value_pct <= -8) return '<span class="value-badge steal">⚡ '+ Math.abs(it.value_pct) +'% מתחת לחציון</span>';
-  if (it.value_pct >= 8) return '<span class="value-badge pricey">'+ it.value_pct +'% מעל לחציון</span>';
-  return '<span class="value-badge fair">בסביבת חציון השכונה</span>';
+  if (it.value_pct <= -8) return '<span class="value-pill steal">⚡ '+ Math.abs(it.value_pct) +'% מתחת</span>';
+  if (it.value_pct >= 8)  return '<span class="value-pill pricey">'+ it.value_pct +'% מעל</span>';
+  return '';
 }
 
 function renderCard(it) {
   const isSeen = seenSet.has(it.token);
   const isSaved = savedSet.has(it.token);
   const isNew = newSet.has(it.token) || it.is_fresh;
-  const cls = ['card'];
-  if (isSeen) cls.push('is-seen');
-  if (isSaved) cls.push('is-saved');
-  if (it.is_hot && !isSeen) cls.push('is-hot');
+  const cls = ['apt-card'];
+  if (isSeen) cls.push('seen');
+  if (isSaved) cls.push('saved');
 
   const addr = addrOf(it);
-  const houseNum = it.house_number || '?';
   const street = it.street || '';
+  const houseNum = it.house_number || '?';
 
-  // image or fallback
-  const img = it.image
-    ? '<div class="card-img" style="background-image:url(\''+ esc(it.image) +'\')"></div>'
-    : '<div class="card-img"><div class="card-img-fallback">'+
-        '<div class="fb-num">'+ esc(houseNum) +'</div>'+
-        '<div class="fb-street">'+ esc(street) +'</div>'+
-        '<div class="fb-hint">לא הועלתה תמונה</div>'+
-      '</div></div>';
+  const imgWrap = it.image
+    ? '<div class="apt-image-wrap has-img" style="background-image:url(\''+ esc(it.image) +'\')">'
+    : '<div class="apt-image-wrap"><div class="apt-image-fallback">'+
+      '<div class="fb-num">'+ esc(houseNum) +'</div>'+
+      '<div class="fb-street">'+ esc(street) +'</div></div>';
 
-  // badges TR (top-left in RTL = top-right in LTR; spec calls top-left for "NEW")
-  const badgesTR = [];
-  if (isNew) badgesTR.push('<span class="card-badge new">חדש</span>');
-  if (it.had_price_drop) badgesTR.push('<span class="card-badge drop">↓ ירד מחיר</span>');
-  if (it.is_steal && !isNew) badgesTR.push('<span class="card-badge hot">🔥 שווה</span>');
-  if (it.same_building_count > 1) badgesTR.push('<span class="card-badge fresh">'+ it.same_building_count +' באותו בניין</span>');
+  const badges = [];
+  if (isNew) badges.push('<span class="badge badge-new">חדש</span>');
+  if (it.had_price_drop) badges.push('<span class="badge badge-drop">↓ ירד מחיר</span>');
+  if (it.ad_type === 'private') badges.push('<span class="badge badge-private">פרטי</span>');
+  if (it.is_steal && !isNew) badges.push('<span class="badge badge-hot">🔥 שווה</span>');
 
-  // fresh time badge (TL in RTL)
-  const badgesTL = [];
-  if (it.discovered_at) badgesTL.push('<span class="card-badge fresh">⏱ '+ timeAgo(it.discovered_at) +'</span>');
+  const heart = '<svg width="16" height="16" viewBox="0 0 24 24" fill="'+ (isSaved?'currentColor':'none') +'" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
 
-  // price block
+  const tags = [];
+  if (it.has_mamad)  tags.push('<span class="apt-tag has">✓ ממ"ד</span>');
+  if (it.has_parking) tags.push('<span class="apt-tag has">✓ חניה</span>');
+  if (it.has_balcony) tags.push('<span class="apt-tag has">✓ מרפסת</span>');
+
   const priceOldHtml = it.price_was && it.price_was > it.price
-    ? '<span class="price-old">'+ fmt(it.price_was) +'</span>' : '';
-  const priceBlock = '<div class="card-price-tl"><div class="card-price-block">'+
-    priceOldHtml +
-    '<span class="price-now">'+ fmt(it.price) +' ₪</span>'+
-    '</div></div>';
-
-  // features
-  const feat = (lbl, on) => '<span class="feat '+ (on?'has':'miss') +'">'+ (on?'✓':'·') +' '+ lbl +'</span>';
-  const features = '<div class="feat-row">'+
-    feat('ממ"ד', it.has_mamad) +
-    feat('חניה', it.has_parking) +
-    feat('מרפסת', it.has_balcony) +
-    '</div>';
-
-  const sourceLabel = it.ad_type === 'private' ? 'בעלים פרטי' : (it.agency || 'מתווך');
-  const sourceClass = it.ad_type === 'private' ? 'private' : 'commercial';
+    ? '<span class="apt-price-old">'+ fmt(it.price_was) +'</span>' : '';
 
   return `
     <article class="${cls.join(' ')}" data-token="${esc(it.token)}">
-      ${img}
-      <div class="card-img-grad"></div>
-      <div class="card-badges-tr">${badgesTR.join('')}</div>
-      <div class="card-badges-tl">${badgesTL.join('')}</div>
-      ${priceBlock}
-      <div class="card-body">
-        <div class="card-addr">${esc(addr)}</div>
-        <div class="card-meta">${esc(it.neighborhood||'')} · קומה ${it.floor != null ? it.floor : '—'}</div>
-        <div class="card-specs">
-          <span><b>${it.rooms}</b> חדרים</span>
-          <span class="dot">·</span>
-          <span><b>${it.sqm}</b> מ״ר</span>
-          <span class="dot">·</span>
-          <span><b>₪${fmt(it.ppm)}</b>/מ״ר</span>
-        </div>
-        ${valueBadge(it)}
-        ${features}
-        <span class="scan-price" style="display:none;">${fmt(it.price)} ₪</span>
+      ${imgWrap}
+        <div class="badges-row">${badges.join('')}</div>
+        <button class="save-btn ${isSaved?'saved':''}" data-act="save" title="שמור (F)">${heart}</button>
       </div>
-      <div class="card-footer">
-        <span class="card-source">
-          <span class="source-dot ${sourceClass}"></span>
-          <span class="src-name">${esc(sourceLabel)}</span>
+      <div class="apt-body">
+        <div class="apt-price-row">
+          <span class="apt-price">${fmt(it.price)}<span style="font-size:14px;font-weight:500;color:var(--text-3);"> ₪</span></span>
+          ${priceOldHtml}
+          ${valueLabel(it)}
+          <span class="apt-ppm">₪${fmt(it.ppm)}/מ״ר</span>
+        </div>
+        <div class="apt-address">${esc(addr)} · קומה ${it.floor != null ? it.floor : '—'}</div>
+        <div class="apt-details">
+          <span><b>${it.rooms}</b> חדרים</span>
+          <span><b>${it.sqm}</b> מ״ר</span>
+        </div>
+        <div class="apt-tags">${tags.join('')}</div>
+      </div>
+      <div class="apt-footer">
+        <span class="apt-date">${timeAgo(it.discovered_at)}</span>
+        <span class="apt-actions">
+          <button class="apt-seen-btn ${isSeen?'seen':''}" data-act="seen">${isSeen?'✓ ראיתי':'סמן כראיתי'}</button>
+          <a class="apt-open" href="${esc(it.url)}" target="_blank" rel="noopener" data-no-act>פתח ←</a>
         </span>
-        <span class="card-actions">
-          <button class="icon-btn ${isSaved?'active save':''}" data-act="save" title="שמור (F)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="${isSaved?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          </button>
-          <button class="icon-btn ${isSeen?'active seen':''}" data-act="seen" title="סמן ראיתי">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-          <button class="icon-btn" data-act="dismiss" title="הסתר (X)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-          </button>
-        </span>
-        <a class="card-cta" href="${esc(it.url)}" target="_blank" rel="noopener" data-no-act>פתח ←</a>
       </div>
     </article>
   `;
 }
 
-/* ============== RENDER ============== */
 function renderActive() {
   const items = visibleItems();
-  const grid = $('grid');
-  const empty = $('empty-active');
-  if (activeView === 'map') return; // skip
-  grid.style.display = items.length ? '' : 'none';
-  empty.style.display = items.length ? 'none' : 'block';
-  grid.innerHTML = items.map(renderCard).join('');
+  $('grid').style.display = items.length ? '' : 'none';
+  $('empty-active').style.display = items.length ? 'none' : 'block';
+  $('grid').innerHTML = items.map(renderCard).join('');
 }
-
 function renderSaved() {
   const items = DATA.items.filter(i => savedSet.has(i.token));
-  const grid = $('saved-grid'); const empty = $('empty-saved');
-  grid.style.display = items.length ? '' : 'none';
-  empty.style.display = items.length ? 'none' : 'block';
-  grid.innerHTML = items.map(renderCard).join('');
+  $('saved-grid').style.display = items.length ? '' : 'none';
+  $('empty-saved').style.display = items.length ? 'none' : 'block';
+  $('saved-grid').innerHTML = items.map(renderCard).join('');
 }
-
 function renderHistory() {
-  const wrap = $('history'); const empty = $('empty-history');
-  if (!HISTORY.length) { wrap.style.display = 'none'; empty.style.display = 'block'; return; }
-  wrap.style.display = ''; empty.style.display = 'none';
+  const wrap = $('history');
+  if (!HISTORY.length) { wrap.style.display='none'; $('empty-history').style.display='block'; return; }
+  wrap.style.display=''; $('empty-history').style.display='none';
   const ICONS = { added:'➕', removed:'✕', price_dropped:'↓', price_raised:'↑' };
-  const VERBS = { added:'דירה חדשה התווספה', removed:'מודעה ירדה', price_dropped:'מחיר ירד', price_raised:'מחיר עלה' };
+  const VERBS = { added:'דירה חדשה', removed:'מודעה ירדה', price_dropped:'מחיר ירד', price_raised:'מחיר עלה' };
   wrap.innerHTML = HISTORY.map(ev => {
     const it = ev.item || {}; const addr = addrOf(it);
     let detail;
@@ -849,8 +870,7 @@ function renderHistory() {
         '<span class="price-now">'+ fmt(ev.new_price) +' ₪</span>';
     } else {
       detail = '<b>'+ esc(addr) +'</b> · '+ it.rooms +' חד׳ · '+ it.sqm +' מ״ר · ' +
-        '<span class="price-now">'+ fmt(it.price) +' ₪</span>' +
-        (it.ad_type === 'private' ? ' · בעלים פרטי' : (it.agency ? ' · '+ esc(it.agency) : ''));
+        '<span class="price-now">'+ fmt(it.price) +' ₪</span>';
     }
     const link = it.url ? ' · <a href="'+ esc(it.url) +'" target="_blank" rel="noopener">פתח ←</a>' : '';
     return '<div class="ev '+ ev.type +'">'+
@@ -863,89 +883,103 @@ function renderHistory() {
   }).join('');
 }
 
-/* ============== MAP ============== */
 let mapInstance = null;
 function renderMap() {
   $('grid').style.display = 'none';
   $('empty-active').style.display = 'none';
   const m = $('map-view'); m.style.display = '';
   if (mapInstance) { mapInstance.remove(); mapInstance = null; }
-  // Center on Nahalat Yitzhak
   mapInstance = L.map('map-view').setView([32.077, 34.798], 16);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '© OpenStreetMap'
-  }).addTo(mapInstance);
-  const items = visibleItems().filter(i => i.lat && i.lon);
-  items.forEach(it => {
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapInstance);
+  visibleItems().filter(i => i.lat && i.lon).forEach(it => {
     const cls = newSet.has(it.token) || it.is_fresh ? 'is-new' : (savedSet.has(it.token) ? 'is-saved' : '');
-    const icon = L.divIcon({
-      className: 'map-pin-wrap',
+    const icon = L.divIcon({ className: 'map-pin-wrap',
       html: '<div class="map-pin '+ cls +'">₪'+ fmt(it.price) +'</div>',
-      iconSize: [70, 26], iconAnchor: [35, 13],
-    });
+      iconSize: [70, 26], iconAnchor: [35, 13] });
     const marker = L.marker([it.lat, it.lon], { icon }).addTo(mapInstance);
-    const addr = addrOf(it);
-    marker.bindPopup(`
-      <b>${esc(addr)}</b><br>
-      ${it.rooms} חד׳ · ${it.sqm} מ״ר · ${fmt(it.price)} ₪<br>
-      <a href="${esc(it.url)}" target="_blank">פתח ←</a>
-    `);
+    marker.bindPopup(`<b>${esc(addrOf(it))}</b><br>${it.rooms} חד׳ · ${it.sqm} מ״ר · ${fmt(it.price)} ₪<br><a href="${esc(it.url)}" target="_blank">פתח ←</a>`);
   });
 }
 
-/* ============== TAB SWITCH ============== */
-let currentTab = 'active';
+function computeStats() {
+  const items = DATA.items;
+  const prices = items.map(i => i.price).filter(Boolean);
+  const ppms = items.map(i => i.ppm).filter(Boolean);
+  const fresh24 = items.filter(i => i.is_fresh).length;
+  $('hs-active').textContent = items.length;
+  $('hs-new').textContent = fresh24;
+  $('hs-saved').textContent = savedSet.size;
+  const upd = DATA.updated ? new Date(DATA.updated) : null;
+  $('hs-updated').textContent = upd ? upd.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'}) : '—';
+  $('sp-active').textContent = items.length;
+  $('sp-median').textContent = prices.length ? fmt(Math.round(median(prices))) + ' ₪' : '—';
+  $('sp-ppm').textContent = ppms.length ? '₪' + fmt(Math.round(medianPpm)) : '—';
+  $('b-active').textContent = items.length;
+  $('b-saved').textContent = savedSet.size;
+  $('b-history').textContent = HISTORY.length;
+
+  const sevenDays = Date.now() - 7*86400*1000;
+  let added=0, removed=0, drops7=0, raises7=0;
+  for (const ev of HISTORY) {
+    if (!ev.ts || new Date(ev.ts).getTime() < sevenDays) continue;
+    if (ev.type === 'added') added++;
+    else if (ev.type === 'removed') removed++;
+    else if (ev.type === 'price_dropped') drops7++;
+    else if (ev.type === 'price_raised') raises7++;
+  }
+  $('ms-added').textContent = added;
+  $('ms-drops').textContent = drops7;
+  $('ms-raises').textContent = raises7;
+  $('ms-removed').textContent = removed;
+  $('sp-week').textContent = added;
+  $('sp-week-sub').textContent = drops7 + ' ירידות · ' + removed + ' ירדו';
+}
+
 function showTab(name) {
   currentTab = name;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   $('tab-active').style.display = name === 'active' ? '' : 'none';
   $('tab-saved').style.display = name === 'saved' ? '' : 'none';
   $('tab-history').style.display = name === 'history' ? '' : 'none';
-  $('filterbar').style.display = name === 'active' ? '' : 'none';
-  $('sortbar').style.display = name === 'active' ? '' : 'none';
-  $('sidebar').style.display = name === 'history' ? 'none' : '';
+  $('toolbar').style.display = name === 'active' ? '' : 'none';
   if (name === 'saved') renderSaved();
   if (name === 'history') renderHistory();
 }
 
-/* ============== EVENTS ============== */
 document.querySelector('.tabs').addEventListener('click', e => {
   const t = e.target.closest('.tab'); if (t) showTab(t.dataset.tab);
 });
 
 document.addEventListener('click', e => {
-  const card = e.target.closest('.card');
-  const btn = e.target.closest('.icon-btn');
+  const card = e.target.closest('.apt-card');
   if (!card) return;
   const token = card.dataset.token;
-  if (btn) {
+  const seenBtn = e.target.closest('[data-act=seen]');
+  const saveBtn = e.target.closest('[data-act=save]');
+  const link = e.target.closest('[data-no-act]');
+  if (link) return;
+  if (saveBtn) {
     e.preventDefault();
-    const act = btn.dataset.act;
-    if (act === 'save') {
-      if (savedSet.has(token)) { savedSet.delete(token); showToast('הוסר משמורים'); }
-      else { savedSet.add(token); showToast('נשמר'); }
-      ls.set('saved', [...savedSet]);
-    } else if (act === 'seen') {
-      if (seenSet.has(token)) seenSet.delete(token); else seenSet.add(token);
-      ls.set('seen', [...seenSet]);
-      showToast(seenSet.has(token) ? 'סומן כראיתי' : 'בוטל סימון');
-    } else if (act === 'dismiss') {
-      dismissedSet.add(token); ls.set('dismissed', [...dismissedSet]);
-      showToast('הוסתר');
-    }
+    if (savedSet.has(token)) { savedSet.delete(token); showToast('הוסר משמורים'); }
+    else { savedSet.add(token); showToast('נשמר ❤'); }
+    ls.set('saved', [...savedSet]);
+  } else if (seenBtn) {
+    e.preventDefault();
+    if (seenSet.has(token)) { seenSet.delete(token); showToast('בוטל סימון'); }
+    else { seenSet.add(token); showToast('סומן כראיתי'); }
+    ls.set('seen', [...seenSet]);
+  }
+  if (saveBtn || seenBtn) {
     if (currentTab === 'active') renderActive();
-    if (currentTab === 'saved') renderSaved();
+    else if (currentTab === 'saved') renderSaved();
     computeStats();
   }
 });
 
-// Filter bar handlers
-$('price-min').addEventListener('input', e => { priceMin = +e.target.value; if (priceMin > priceMax) priceMin = priceMax; e.target.value = priceMin; $('pmin-v').textContent = fmt(priceMin); renderActive(); if (activeView==='map') renderMap(); });
-$('price-max').addEventListener('input', e => { priceMax = +e.target.value; if (priceMax < priceMin) priceMax = priceMin; e.target.value = priceMax; $('pmax-v').textContent = fmt(priceMax); renderActive(); if (activeView==='map') renderMap(); });
-$('rooms-tg').addEventListener('click', e => {
-  const b = e.target.closest('.toggle-pill'); if (!b) return;
-  $('rooms-tg').querySelectorAll('.toggle-pill').forEach(x => x.classList.remove('active'));
-  b.classList.add('active'); activeRooms = b.dataset.r;
+$('rooms-chips').addEventListener('click', e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  $('rooms-chips').querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+  c.classList.add('active'); activeRooms = c.dataset.r;
   renderActive(); if (activeView==='map') renderMap();
 });
 $('feat-chips').addEventListener('click', e => {
@@ -954,18 +988,23 @@ $('feat-chips').addEventListener('click', e => {
   c.classList.toggle('active', featOn[k]);
   renderActive(); if (activeView==='map') renderMap();
 });
-document.querySelectorAll('.chip[data-c]').forEach(c => {
-  if (c.parentElement.id !== 'feat-chips') {
-    c.addEventListener('click', () => {
-      const k = c.dataset.c; featOn[k] = !featOn[k];
-      c.classList.toggle('active', featOn[k]);
-      renderActive(); if (activeView==='map') renderMap();
-    });
-  }
+$('price-min').addEventListener('input', e => { priceMin = +e.target.value || 0; renderActive(); if (activeView==='map') renderMap(); });
+$('price-max').addEventListener('input', e => { priceMax = +e.target.value || 999999; renderActive(); if (activeView==='map') renderMap(); });
+['newonly','droponly','hideseen'].forEach(k => {
+  $('cb-'+k).addEventListener('change', e => { urgency[k] = e.target.checked; renderActive(); if (activeView==='map') renderMap(); });
 });
-
-// Sort bar
-document.querySelector('.sortbar').addEventListener('click', e => {
+$('reset-btn').addEventListener('click', () => {
+  activeRooms = 'all'; priceMin = 8000; priceMax = 12000;
+  Object.keys(featOn).forEach(k => featOn[k] = false);
+  Object.keys(urgency).forEach(k => urgency[k] = false);
+  $('rooms-chips').querySelectorAll('.chip').forEach((x,i) => x.classList.toggle('active', i === 0));
+  $('feat-chips').querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+  $('price-min').value = 8000; $('price-max').value = 12000;
+  ['newonly','droponly','hideseen'].forEach(k => { $('cb-'+k).checked = false; });
+  renderActive(); if (activeView==='map') renderMap();
+  showToast('פילטרים אופסו');
+});
+$('toolbar').addEventListener('click', e => {
   const s = e.target.closest('.sort-pill');
   if (s) {
     document.querySelectorAll('.sort-pill').forEach(x => x.classList.remove('active'));
@@ -974,41 +1013,31 @@ document.querySelector('.sortbar').addEventListener('click', e => {
   }
   const v = e.target.closest('[data-v]');
   if (v) {
-    document.querySelectorAll('.view-switcher button').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.view-toggle button').forEach(x => x.classList.remove('active'));
     v.classList.add('active'); activeView = v.dataset.v;
     if (activeView === 'map') renderMap();
     else { $('map-view').style.display = 'none'; renderActive(); }
   }
 });
-$('scan-btn').addEventListener('click', () => toggleScan());
 
-function toggleScan() {
-  scanMode = !scanMode;
-  document.body.classList.toggle('scan-mode', scanMode);
-  $('scan-btn').classList.toggle('active', scanMode);
-}
-
-/* ============== KEYBOARD ============== */
-let kbIdx = -1;
-function highlightCard(idx) {
-  document.querySelectorAll('.card').forEach((c,i) => c.style.outline = i === idx ? '3px solid var(--info)' : '');
-  const c = document.querySelectorAll('.card')[idx];
-  if (c) c.scrollIntoView({ block: 'center', behavior: 'smooth' });
-}
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-  const cards = [...document.querySelectorAll('.card')];
-  if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); kbIdx = Math.min(kbIdx+1, cards.length-1); highlightCard(kbIdx); }
-  else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); kbIdx = Math.max(kbIdx-1, 0); highlightCard(kbIdx); }
-  else if (e.key === 's' || e.key === 'S') { toggleScan(); }
-  else if (e.key === 'Enter' && kbIdx >= 0) { const c = cards[kbIdx]; const a = c.querySelector('.card-cta'); if (a) window.open(a.href, '_blank'); }
-  else if (e.key === 'f' || e.key === 'F') { if (kbIdx>=0) cards[kbIdx].querySelector('[data-act=save]').click(); }
-  else if (e.key === 'x' || e.key === 'X') { if (kbIdx>=0) cards[kbIdx].querySelector('[data-act=dismiss]').click(); }
+  const cards = [...document.querySelectorAll('.apt-card')];
+  if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); kbIdx = Math.min(kbIdx+1, cards.length-1); highlightCard(cards, kbIdx); }
+  else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); kbIdx = Math.max(kbIdx-1, 0); highlightCard(cards, kbIdx); }
+  else if (e.key === 'Enter' && kbIdx >= 0) { const a = cards[kbIdx].querySelector('.apt-open'); if (a) window.open(a.href, '_blank'); }
+  else if ((e.key === 'f' || e.key === 'F') && kbIdx >= 0) { cards[kbIdx].querySelector('[data-act=save]').click(); }
+  else if ((e.key === 'x' || e.key === 'X') && kbIdx >= 0) {
+    const tok = cards[kbIdx].dataset.token;
+    dismissedSet.add(tok); ls.set('dismissed', [...dismissedSet]);
+    showToast('הוסתר'); renderActive();
+  }
 });
+function highlightCard(cards, idx) {
+  cards.forEach((c,i) => c.classList.toggle('kbd-active', i === idx));
+  const c = cards[idx]; if (c) c.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
 
-/* ============== INIT ============== */
-$('pmin-v').textContent = fmt(priceMin);
-$('pmax-v').textContent = fmt(priceMax);
 computeStats();
 renderActive();
 </script>
