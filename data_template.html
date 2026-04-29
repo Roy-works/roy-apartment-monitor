@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מוניטור דירות — נחלת יצחק</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+:root {
+  color-scheme: light;
+  --bg:            oklch(97% 0.008 70);
+  --surface:       oklch(99.5% 0.004 70);
+  --surface2:      oklch(95% 0.010 70);
+  --border:        oklch(88% 0.010 70);
+  --border-strong: oklch(78% 0.015 70);
+  --text:          oklch(22% 0.015 250);
+  --text-2:        oklch(45% 0.012 250);
+  --text-3:        oklch(62% 0.010 250);
+  --accent:        oklch(52% 0.14 195);
+  --accent-light:  oklch(94% 0.04 195);
+  --accent-dark:   oklch(38% 0.14 195);
+  --green:         oklch(55% 0.14 155);
+  --green-light:   oklch(94% 0.05 155);
+  --red:           oklch(55% 0.16 25);
+  --red-light:     oklch(96% 0.05 25);
+  --amber:         oklch(68% 0.14 75);
+  --amber-light:   oklch(96% 0.05 75);
+  --shadow-sm:     0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow:        0 4px 12px oklch(0% 0 0 / 0.08), 0 1px 3px oklch(0% 0 0 / 0.05);
+  --shadow-lg:     0 12px 32px oklch(0% 0 0 / 0.12), 0 4px 8px oklch(0% 0 0 / 0.06);
+  --radius:        12px;
+  --radius-sm:     8px;
+  --radius-xs:     5px;
+}
+* { box-sizing: border-box; font-family: 'Assistant', sans-serif; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  direction: rtl;
+  min-height: 100vh;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a { color: var(--accent); text-decoration: none; }
+button { font-family: 'Assistant', sans-serif; cursor: pointer; }
+
+/* ============== HEADER ============== */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  height: 56px;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand-info { display: flex; flex-direction: column; gap: 1px; }
+.logo-title   { font-size: 15px; font-weight: 700; line-height: 1; }
+.logo-subtitle { font-size: 11px; color: var(--text-3); }
+.live-wrap { display: flex; align-items: center; gap: 6px; padding-right: 6px; border-right: 1px solid var(--border); padding-left: 12px; }
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+.live-label { font-size: 12px; font-weight: 600; color: var(--green); }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.header-stats { display: flex; margin-right: auto; }
+.header-stat {
+  padding: 0 14px;
+  border-left: 1px solid var(--border);
+  text-align: center;
+}
+.header-stat:last-child { border-left: none; }
+.header-stat-value { font-size: 17px; font-weight: 700; line-height: 1.1; }
+.header-stat-value.green { color: var(--green); }
+.header-stat-value.amber { color: var(--amber); }
+.header-stat-label { font-size: 10px; color: var(--text-3); letter-spacing: 0.3px; }
+
+/* ============== LAYOUT ============== */
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* ============== STATS PANEL ============== */
+.stats-panel {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.stat-card.accent {
+  background: var(--accent);
+  color: white;
+  border-color: transparent;
+}
+.stat-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.4px; text-transform: uppercase;
+  opacity: 0.65;
+}
+.stat-value {
+  font-size: 26px; font-weight: 700;
+  line-height: 1.1; letter-spacing: -0.5px;
+}
+.stat-sub { font-size: 12px; opacity: 0.65; }
+
+/* ============== TABS ============== */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+}
+.tab {
+  flex: 1; padding: 8px 0;
+  border-radius: 9px;
+  font-size: 14px; font-weight: 500;
+  color: var(--text-2);
+  background: transparent;
+  border: none; cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.tab:hover:not(.active) { color: var(--text); background: var(--surface2); }
+.tab.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+}
+.tab-badge {
+  font-size: 11px; font-weight: 700;
+  padding: 1px 7px; border-radius: 99px;
+  background: var(--surface2); color: var(--text-3);
+}
+.tab.active .tab-badge {
+  background: rgba(255,255,255,0.25);
+  color: white;
+}
+
+/* ============== CONTENT GRID ============== */
+.content-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ============== SIDEBAR ============== */
+.sidebar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 76px;
+  display: flex; flex-direction: column; gap: 22px;
+}
+.filter-section { display: flex; flex-direction: column; gap: 10px; }
+.filter-section-title {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.chip-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--border-strong); }
+.chip.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+.checkbox-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); cursor: pointer; user-select: none; }
+.checkbox-row input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.price-inputs { display: flex; gap: 8px; align-items: center; }
+.price-input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  font-size: 13px;
+  background: var(--surface2);
+  color: var(--text);
+  outline: none;
+}
+.price-input:focus { border-color: var(--accent); }
+.price-sep { color: var(--text-3); font-size: 13px; }
+.reset-btn {
+  width: 100%; padding: 9px;
+  border-radius: 9px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-2);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.reset-btn:hover { background: var(--border); color: var(--text); }
+
+.sidebar-mini-stats { display: flex; flex-direction: column; gap: 8px; }
+.mini-stat { display: flex; justify-content: space-between; font-size: 12px; }
+.mini-stat .lbl { color: var(--text-3); }
+.mini-stat .val { font-weight: 700; color: var(--text); }
+.mini-stat .val.green { color: var(--green); }
+.mini-stat .val.red { color: var(--red); }
+
+/* ============== TOOLBAR ============== */
+.toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.sort-pill {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+  padding: 6px 12px; font-size: 13px; font-weight: 500; color: var(--text-2);
+}
+.sort-pill:hover { background: var(--surface2); }
+.sort-pill.active { background: var(--accent); border-color: var(--accent); color: white; font-weight: 700; }
+.view-toggle { margin-right: auto; display: flex; gap: 2px; padding: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; }
+.view-toggle button { background: none; border: none; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--text-3); }
+.view-toggle button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+
+/* ============== APARTMENTS GRID ============== */
+.apartments-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* ============== APT CARD ============== */
+.apt-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.18s;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.apt-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+.apt-card.seen {
+  opacity: 0.72;
+  background: var(--surface2);
+}
+.apt-card.saved {
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px var(--red), var(--shadow);
+}
+.apt-card.kbd-active {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.apt-image-wrap {
+  position: relative; aspect-ratio: 16/10;
+  background: var(--surface2);
+  background-size: cover; background-position: center;
+}
+.apt-image-fallback {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, oklch(35% 0.04 250) 0%, oklch(25% 0.04 250) 100%);
+  color: white;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; padding: 16px; text-align: center;
+}
+.fb-num { font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -1px; opacity: 0.95; }
+.fb-street { font-size: 13px; font-weight: 500; opacity: 0.85; }
+.apt-image-wrap.has-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,.35) 100%);
+  pointer-events: none;
+}
+
+.badges-row {
+  position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; flex-wrap: wrap; max-width: calc(100% - 56px);
+  z-index: 2;
+}
+.badge {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 99px;
+  color: white;
+  display: inline-flex; align-items: center; gap: 3px;
+}
+.badge-new     { background: var(--green); }
+.badge-drop    { background: var(--red); }
+.badge-private { background: var(--amber); }
+.badge-hot     { background: oklch(58% 0.16 35); }
+.badge-time {
+  background: rgba(255,255,255,0.92); color: var(--text);
+  backdrop-filter: blur(4px);
+}
+
+.save-btn {
+  position: absolute; top: 10px; left: 10px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; border: none; cursor: pointer;
+  backdrop-filter: blur(4px);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+  color: var(--text-2);
+  z-index: 2;
+}
+.save-btn:hover { transform: scale(1.06); }
+.save-btn.saved { background: var(--red); color: white; }
+
+.apt-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+.apt-price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.apt-price {
+  font-size: 22px; font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  line-height: 1;
+}
+.apt-price-old {
+  font-size: 13px; color: var(--text-3);
+  text-decoration: line-through;
+  font-weight: 500;
+}
+.apt-ppm {
+  font-size: 12px; color: var(--text-3);
+  background: var(--surface2);
+  padding: 2px 8px; border-radius: 99px;
+  border: 1px solid var(--border);
+  margin-right: auto;
+}
+.value-pill {
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 99px;
+}
+.value-pill.steal { background: var(--green-light); color: var(--green); }
+.value-pill.fair { background: var(--surface2); color: var(--text-3); border: 1px solid var(--border); }
+.value-pill.pricey { background: var(--red-light); color: var(--red); }
+
+.apt-address { font-size: 14px; font-weight: 500; color: var(--text-2); }
+.apt-details { display: flex; gap: 12px; font-size: 13px; color: var(--text-2); }
+.apt-details span b { color: var(--text); font-weight: 700; }
+.apt-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
+.apt-tag {
+  font-size: 11px;
+  padding: 2px 9px; border-radius: 99px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+.apt-tag.has { background: var(--green-light); color: var(--green); border-color: oklch(80% 0.06 155); }
+
+.apt-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.apt-date { font-size: 12px; color: var(--text-3); }
+.apt-actions { display: flex; gap: 4px; align-items: center; }
+.apt-seen-btn {
+  font-size: 12px; color: var(--accent); font-weight: 500;
+  background: none; border: none;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.apt-seen-btn.seen { color: var(--text-3); }
+.apt-open {
+  background: var(--accent); color: white;
+  padding: 4px 12px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+}
+.apt-open:hover { background: var(--accent-dark); text-decoration: none; color: white; }
+
+/* ============== HISTORY TAB ============== */
+.history-list { display: flex; flex-direction: column; gap: 0; }
+.ev {
+  background: var(--surface); border: 1px solid var(--border); border-bottom: none;
+  padding: 14px 18px; display: flex; gap: 14px; align-items: flex-start;
+}
+.ev:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+.ev:last-child { border-radius: 0 0 var(--radius) var(--radius); border-bottom: 1px solid var(--border); }
+.ev:only-child { border-radius: var(--radius); }
+.ev-icon {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.ev.added .ev-icon { background: var(--green-light); color: var(--green); }
+.ev.removed .ev-icon { background: var(--red-light); color: var(--red); }
+.ev.price_dropped .ev-icon { background: var(--green-light); color: var(--green); }
+.ev.price_raised .ev-icon { background: var(--red-light); color: var(--red); }
+.ev-text { flex: 1; min-width: 0; }
+.ev-when { font-size: 12px; color: var(--text-3); }
+.ev-when b { color: var(--text); font-weight: 700; }
+.ev-what { font-size: 14px; margin-top: 2px; }
+.ev-what b { font-weight: 700; }
+.ev-what .price-old { color: var(--text-3); text-decoration: line-through; }
+.ev-what .price-now { color: var(--accent); font-weight: 700; }
+
+/* ============== MAP ============== */
+#map-view { height: 600px; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+.leaflet-container { font-family: 'Assistant', sans-serif; }
+.map-pin {
+  background: var(--text); color: #fff; padding: 4px 8px; border-radius: 6px;
+  font-weight: 700; font-size: 13px; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25); border: 2px solid #fff;
+}
+.map-pin.is-new { background: var(--green); }
+.map-pin.is-saved { background: var(--red); }
+
+/* ============== EMPTY ============== */
+.empty {
+  text-align: center; padding: 56px 20px; color: var(--text-3);
+  background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius);
+}
+.empty h3 { font-size: 17px; font-weight: 700; color: var(--text); margin: 0 0 6px; }
+.empty p { margin: 0; font-size: 13px; }
+
+/* ============== KEYBOARD HINTS ============== */
+.keyboard-hints {
+  margin-top: 24px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; gap: 20px; flex-wrap: wrap;
+}
+kbd {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-family: monospace;
+}
+.hint { font-size: 12px; color: var(--text-3); display: flex; gap: 5px; align-items: center; }
+
+/* ============== TOAST ============== */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg);
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+  z-index: 1000;
+}
+.toast.show { opacity: 1; }
+
+/* ============== SCROLLBAR ============== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+/* ============== RESPONSIVE ============== */
+@media (max-width: 980px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .sidebar { position: static; width: 100%; }
+  .stats-panel { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  header { padding: 0 14px; gap: 10px; }
+  .brand-info { display: none; }
+  .header-stats { gap: 0; }
+  .header-stat { padding: 0 8px; }
+  .main-container { padding: 14px; }
+  .apartments-grid { grid-template-columns: 1fr; }
+  .stats-panel { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-card { padding: 10px 12px; }
+  .stat-value { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo-icon">נ</div>
+    <div class="brand-info">
+      <div class="logo-title">מוניטור דירות</div>
+      <div class="logo-subtitle">נחלת יצחק · ת״א</div>
+    </div>
+  </div>
+  <div class="live-wrap">
+    <span class="live-dot"></span>
+    <span class="live-label">חי</span>
+  </div>
+  <div class="header-stats">
+    <div class="header-stat">
+      <div class="header-stat-value" id="hs-active">—</div>
+      <div class="header-stat-label">פעילות</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-value green" id="hs-new">—</div>
+      <div class="header-stat-label">חדשות 24ש</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-value amber" id="hs-saved">—</div>
+      <div class="header-stat-label">שמורים</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-value" id="hs-updated">—</div>
+      <div class="header-stat-label">עודכן</div>
+    </div>
+  </div>
+</header>
+
+<div class="main-container">
+  <!-- STATS PANEL -->
+  <div class="stats-panel">
+    <div class="stat-card accent">
+      <div class="stat-label">דירות תואמות</div>
+      <div class="stat-value" id="sp-active">—</div>
+      <div class="stat-sub">3-4 חד׳ · ממ"ד · 8-12K</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">חציון מחיר</div>
+      <div class="stat-value" id="sp-median">—</div>
+      <div class="stat-sub">בשכונה כרגע</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">חציון ₪/מ״ר</div>
+      <div class="stat-value" id="sp-ppm">—</div>
+      <div class="stat-sub">בסיס לחישוב שווי</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">השבוע</div>
+      <div class="stat-value" id="sp-week">—</div>
+      <div class="stat-sub" id="sp-week-sub">—</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <nav class="tabs">
+    <button class="tab active" data-tab="active">דירות פעילות <span class="tab-badge" id="b-active">0</span></button>
+    <button class="tab" data-tab="saved">שמורים <span class="tab-badge" id="b-saved">0</span></button>
+    <button class="tab" data-tab="history">היסטוריה <span class="tab-badge" id="b-history">0</span></button>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content-grid">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="filter-section">
+        <div class="filter-section-title">חדרים</div>
+        <div class="chip-group" id="rooms-chips">
+          <button class="chip active" data-r="all">הכל</button>
+          <button class="chip" data-r="3">3</button>
+          <button class="chip" data-r="3.5">3.5</button>
+          <button class="chip" data-r="4">4</button>
+        </div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-title">מחיר חודשי (₪)</div>
+        <div class="price-inputs">
+          <input type="number" class="price-input" id="price-min" min="6000" max="14000" step="100" value="8000">
+          <span class="price-sep">—</span>
+          <input type="number" class="price-input" id="price-max" min="6000" max="14000" step="100" value="12000">
+        </div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-title">מאפיינים</div>
+        <div class="chip-group" id="feat-chips">
+          <button class="chip" data-c="parking">חניה</button>
+          <button class="chip" data-c="balcony">מרפסת</button>
+          <button class="chip" data-c="elevator">מעלית</button>
+          <button class="chip" data-c="private">בעלים פרטי</button>
+        </div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-title">דחיפות</div>
+        <label class="checkbox-row"><input type="checkbox" id="cb-newonly"> חדשות בלבד (24ש)</label>
+        <label class="checkbox-row"><input type="checkbox" id="cb-droponly"> ירדו במחיר</label>
+        <label class="checkbox-row"><input type="checkbox" id="cb-hideseen"> הסתר ראיתי</label>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-title">השבוע (7 ימים)</div>
+        <div class="sidebar-mini-stats">
+          <div class="mini-stat"><span class="lbl">דירות חדשות</span><span class="val green" id="ms-added">—</span></div>
+          <div class="mini-stat"><span class="lbl">ירידות מחיר</span><span class="val green" id="ms-drops">—</span></div>
+          <div class="mini-stat"><span class="lbl">העלאות מחיר</span><span class="val red" id="ms-raises">—</span></div>
+          <div class="mini-stat"><span class="lbl">ירדו מהאוויר</span><span class="val" id="ms-removed">—</span></div>
+        </div>
+      </div>
+      <button class="reset-btn" id="reset-btn">איפוס פילטרים</button>
+    </aside>
+
+    <!-- MAIN -->
+    <div>
+      <div class="toolbar" id="toolbar">
+        <button class="sort-pill active" data-s="hot">🔥 הכי שווה</button>
+        <button class="sort-pill" data-s="newest">🆕 חדש</button>
+        <button class="sort-pill" data-s="cheapest">💰 זול</button>
+        <button class="sort-pill" data-s="biggest">📐 גדול</button>
+        <button class="sort-pill" data-s="value">⚡ שווי</button>
+        <div class="view-toggle">
+          <button class="active" data-v="grid">⊞ כרטיסים</button>
+          <button data-v="map">🗺 מפה</button>
+        </div>
+      </div>
+
+      <section id="tab-active">
+        <div id="grid" class="apartments-grid"></div>
+        <div id="empty-active" class="empty" style="display:none;">
+          <h3>אין דירות בפילטר הנוכחי</h3>
+          <p>נסה לאפס את הפילטרים, או חכה — דירות חדשות יתווספו אוטומטית כל 15 דק׳.</p>
+        </div>
+        <div id="map-view" style="display:none;"></div>
+      </section>
+
+      <section id="tab-saved" style="display:none;">
+        <div id="saved-grid" class="apartments-grid"></div>
+        <div id="empty-saved" class="empty" style="display:none;">
+          <h3>אין דירות שמורות</h3>
+          <p>לחץ על ❤ בכרטיס דירה כדי לשמור אותו.</p>
+        </div>
+      </section>
+
+      <section id="tab-history" style="display:none;">
+        <div id="history" class="history-list"></div>
+        <div id="empty-history" class="empty" style="display:none;">
+          <h3>עדיין אין היסטוריה</h3>
+          <p>אירועים יופיעו כאן ברגע שתעלה דירה חדשה / מחיר ישתנה / מודעה תרד.</p>
+        </div>
+      </section>
+
+      <div class="keyboard-hints">
+        <div class="hint"><kbd>J</kbd> <kbd>K</kbd> ניווט</div>
+        <div class="hint"><kbd>Enter</kbd> פתח מודעה</div>
+        <div class="hint"><kbd>F</kbd> שמור</div>
+        <div class="hint"><kbd>X</kbd> הסתר</div>
+        <div class="hint"><kbd>S</kbd> סריקה מהירה</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">שמור</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+'use strict';
+
+const DATA = __DATA__;
+const NEW_TOKENS = __NEW__;
+const HISTORY = __HISTORY__;
+
+const ls = {
+  get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const seenSet = new Set(ls.get('seen', []));
+const savedSet = new Set(ls.get('saved', []));
+const dismissedSet = new Set(ls.get('dismissed', []));
+const newSet = new Set(NEW_TOKENS);
+
+const $ = id => document.getElementById(id);
+const fmt = n => n != null ? Number(n).toLocaleString('he-IL') : '—';
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function timeAgo(iso) {
+  if (!iso) return '';
+  const d = new Date(iso); const sec = (Date.now() - d.getTime()) / 1000;
+  if (sec < 60) return 'הרגע';
+  if (sec < 3600) return 'לפני ' + Math.floor(sec/60) + ' דק׳';
+  if (sec < 86400) return 'לפני ' + Math.floor(sec/3600) + ' שעות';
+  if (sec < 86400*7) return 'לפני ' + Math.floor(sec/86400) + ' ימים';
+  return d.toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit' });
+}
+function isFresh24h(iso) { return iso && (Date.now() - new Date(iso).getTime()) < 86400*1000; }
+function median(arr) {
+  const s = [...arr].sort((a,b)=>a-b);
+  if (!s.length) return null;
+  return s.length%2 ? s[(s.length-1)/2] : (s[s.length/2-1]+s[s.length/2])/2;
+}
+function showToast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(()=> t.classList.remove('show'), 1500);
+}
+
+/* derived fields */
+DATA.items.forEach(it => { it.ppm = (it.sqm && it.price) ? Math.round(it.price/it.sqm) : null; });
+const medianPpm = median(DATA.items.map(i => i.ppm).filter(Boolean));
+DATA.items.forEach(it => {
+  if (it.ppm && medianPpm) it.value_pct = Math.round((it.ppm - medianPpm)/medianPpm*100);
+  it.is_steal = (it.value_pct != null && it.value_pct <= -8);
+  it.is_fresh = isFresh24h(it.discovered_at);
+  it.is_hot = it.is_steal || it.is_fresh || newSet.has(it.token);
+  const dropEv = HISTORY.find(e => e.type === 'price_dropped' && e.item && e.item.token === it.token);
+  it.had_price_drop = !!dropEv;
+  if (dropEv) it.price_was = dropEv.old_price;
+});
+
+/* state */
+let activeRooms = 'all', activeSort = 'hot', activeView = 'grid';
+let priceMin = 8000, priceMax = 12000;
+const featOn = { parking: false, balcony: false, elevator: false, private: false };
+const urgency = { newonly: false, droponly: false, hideseen: false };
+let currentTab = 'active';
+let kbIdx = -1;
+
+function passes(it) {
+  if (it.price < priceMin || it.price > priceMax) return false;
+  if (activeRooms !== 'all' && Number(activeRooms) !== it.rooms) return false;
+  if (featOn.parking && !it.has_parking) return false;
+  if (featOn.balcony && !it.has_balcony) return false;
+  if (featOn.elevator && !(it.tags||[]).some(t => t.includes('מעלית'))) return false;
+  if (featOn.private && it.ad_type !== 'private') return false;
+  if (urgency.newonly && !it.is_fresh) return false;
+  if (urgency.droponly && !it.had_price_drop) return false;
+  if (urgency.hideseen && seenSet.has(it.token)) return false;
+  if (dismissedSet.has(it.token)) return false;
+  return true;
+}
+function sortItems(items) {
+  const sorters = {
+    hot: (a,b) => (b.is_hot - a.is_hot) || ((a.value_pct||0) - (b.value_pct||0)) || (a.price - b.price),
+    newest: (a,b) => (b.discovered_at||'').localeCompare(a.discovered_at||''),
+    cheapest: (a,b) => (a.price||999999) - (b.price||999999),
+    biggest: (a,b) => (b.sqm||0) - (a.sqm||0),
+    value: (a,b) => (a.value_pct||0) - (b.value_pct||0),
+  };
+  return [...items].sort(sorters[activeSort]);
+}
+function visibleItems() { return sortItems(DATA.items.filter(passes)); }
+
+function addrOf(it) { return [it.street, it.house_number].filter(Boolean).join(' ') || 'כתובת חסויה'; }
+function valueLabel(it) {
+  if (it.value_pct == null) return '';
+  if (it.value_pct <= -8) return '<span class="value-pill steal">⚡ '+ Math.abs(it.value_pct) +'% מתחת</span>';
+  if (it.value_pct >= 8)  return '<span class="value-pill pricey">'+ it.value_pct +'% מעל</span>';
+  return '';
+}
+
+function renderCard(it) {
+  const isSeen = seenSet.has(it.token);
+  const isSaved = savedSet.has(it.token);
+  const isNew = newSet.has(it.token) || it.is_fresh;
+  const cls = ['apt-card'];
+  if (isSeen) cls.push('seen');
+  if (isSaved) cls.push('saved');
+
+  const addr = addrOf(it);
+  const street = it.street || '';
+  const houseNum = it.house_number || '?';
+
+  const imgWrap = it.image
+    ? '<div class="apt-image-wrap has-img" style="background-image:url(\''+ esc(it.image) +'\')">'
+    : '<div class="apt-image-wrap"><div class="apt-image-fallback">'+
+      '<div class="fb-num">'+ esc(houseNum) +'</div>'+
+      '<div class="fb-street">'+ esc(street) +'</div></div>';
+
+  const badges = [];
+  if (isNew) badges.push('<span class="badge badge-new">חדש</span>');
+  if (it.had_price_drop) badges.push('<span class="badge badge-drop">↓ ירד מחיר</span>');
+  if (it.ad_type === 'private') badges.push('<span class="badge badge-private">פרטי</span>');
+  if (it.is_steal && !isNew) badges.push('<span class="badge badge-hot">🔥 שווה</span>');
+
+  const heart = '<svg width="16" height="16" viewBox="0 0 24 24" fill="'+ (isSaved?'currentColor':'none') +'" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+
+  const tags = [];
+  if (it.has_mamad)  tags.push('<span class="apt-tag has">✓ ממ"ד</span>');
+  if (it.has_parking) tags.push('<span class="apt-tag has">✓ חניה</span>');
+  if (it.has_balcony) tags.push('<span class="apt-tag has">✓ מרפסת</span>');
+
+  const priceOldHtml = it.price_was && it.price_was > it.price
+    ? '<span class="apt-price-old">'+ fmt(it.price_was) +'</span>' : '';
+
+  return `
+    <article class="${cls.join(' ')}" data-token="${esc(it.token)}">
+      ${imgWrap}
+        <div class="badges-row">${badges.join('')}</div>
+        <button class="save-btn ${isSaved?'saved':''}" data-act="save" title="שמור (F)">${heart}</button>
+      </div>
+      <div class="apt-body">
+        <div class="apt-price-row">
+          <span class="apt-price">${fmt(it.price)}<span style="font-size:14px;font-weight:500;color:var(--text-3);"> ₪</span></span>
+          ${priceOldHtml}
+          ${valueLabel(it)}
+          <span class="apt-ppm">₪${fmt(it.ppm)}/מ״ר</span>
+        </div>
+        <div class="apt-address">${esc(addr)} · קומה ${it.floor != null ? it.floor : '—'}</div>
+        <div class="apt-details">
+          <span><b>${it.rooms}</b> חדרים</span>
+          <span><b>${it.sqm}</b> מ״ר</span>
+        </div>
+        <div class="apt-tags">${tags.join('')}</div>
+      </div>
+      <div class="apt-footer">
+        <span class="apt-date">${timeAgo(it.discovered_at)}</span>
+        <span class="apt-actions">
+          <button class="apt-seen-btn ${isSeen?'seen':''}" data-act="seen">${isSeen?'✓ ראיתי':'סמן כראיתי'}</button>
+          <a class="apt-open" href="${esc(it.url)}" target="_blank" rel="noopener" data-no-act>פתח ←</a>
+        </span>
+      </div>
+    </article>
+  `;
+}
+
+function renderActive() {
+  const items = visibleItems();
+  $('grid').style.display = items.length ? '' : 'none';
+  $('empty-active').style.display = items.length ? 'none' : 'block';
+  $('grid').innerHTML = items.map(renderCard).join('');
+}
+function renderSaved() {
+  const items = DATA.items.filter(i => savedSet.has(i.token));
+  $('saved-grid').style.display = items.length ? '' : 'none';
+  $('empty-saved').style.display = items.length ? 'none' : 'block';
+  $('saved-grid').innerHTML = items.map(renderCard).join('');
+}
+function renderHistory() {
+  const wrap = $('history');
+  if (!HISTORY.length) { wrap.style.display='none'; $('empty-history').style.display='block'; return; }
+  wrap.style.display=''; $('empty-history').style.display='none';
+  const ICONS = { added:'➕', removed:'✕', price_dropped:'↓', price_raised:'↑' };
+  const VERBS = { added:'דירה חדשה', removed:'מודעה ירדה', price_dropped:'מחיר ירד', price_raised:'מחיר עלה' };
+  wrap.innerHTML = HISTORY.map(ev => {
+    const it = ev.item || {}; const addr = addrOf(it);
+    let detail;
+    if (ev.type === 'price_dropped' || ev.type === 'price_raised') {
+      detail = '<b>'+ esc(addr) +'</b> · '+ it.rooms +' חד׳ · '+ it.sqm +' מ״ר · ' +
+        '<span class="price-old">'+ fmt(ev.old_price) +' ₪</span> → ' +
+        '<span class="price-now">'+ fmt(ev.new_price) +' ₪</span>';
+    } else {
+      detail = '<b>'+ esc(addr) +'</b> · '+ it.rooms +' חד׳ · '+ it.sqm +' מ״ר · ' +
+        '<span class="price-now">'+ fmt(it.price) +' ₪</span>';
+    }
+    const link = it.url ? ' · <a href="'+ esc(it.url) +'" target="_blank" rel="noopener">פתח ←</a>' : '';
+    return '<div class="ev '+ ev.type +'">'+
+      '<div class="ev-icon">'+ ICONS[ev.type] +'</div>'+
+      '<div class="ev-text">'+
+        '<div class="ev-when">'+ timeAgo(ev.ts) +' · <b>'+ (VERBS[ev.type] || ev.type) +'</b></div>'+
+        '<div class="ev-what">'+ detail + link +'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+let mapInstance = null;
+function renderMap() {
+  $('grid').style.display = 'none';
+  $('empty-active').style.display = 'none';
+  const m = $('map-view'); m.style.display = '';
+  if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+  mapInstance = L.map('map-view').setView([32.077, 34.798], 16);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapInstance);
+  visibleItems().filter(i => i.lat && i.lon).forEach(it => {
+    const cls = newSet.has(it.token) || it.is_fresh ? 'is-new' : (savedSet.has(it.token) ? 'is-saved' : '');
+    const icon = L.divIcon({ className: 'map-pin-wrap',
+      html: '<div class="map-pin '+ cls +'">₪'+ fmt(it.price) +'</div>',
+      iconSize: [70, 26], iconAnchor: [35, 13] });
+    const marker = L.marker([it.lat, it.lon], { icon }).addTo(mapInstance);
+    marker.bindPopup(`<b>${esc(addrOf(it))}</b><br>${it.rooms} חד׳ · ${it.sqm} מ״ר · ${fmt(it.price)} ₪<br><a href="${esc(it.url)}" target="_blank">פתח ←</a>`);
+  });
+}
+
+function computeStats() {
+  const items = DATA.items;
+  const prices = items.map(i => i.price).filter(Boolean);
+  const ppms = items.map(i => i.ppm).filter(Boolean);
+  const fresh24 = items.filter(i => i.is_fresh).length;
+  $('hs-active').textContent = items.length;
+  $('hs-new').textContent = fresh24;
+  $('hs-saved').textContent = savedSet.size;
+  const upd = DATA.updated ? new Date(DATA.updated) : null;
+  $('hs-updated').textContent = upd ? upd.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'}) : '—';
+  $('sp-active').textContent = items.length;
+  $('sp-median').textContent = prices.length ? fmt(Math.round(median(prices))) + ' ₪' : '—';
+  $('sp-ppm').textContent = ppms.length ? '₪' + fmt(Math.round(medianPpm)) : '—';
+  $('b-active').textContent = items.length;
+  $('b-saved').textContent = savedSet.size;
+  $('b-history').textContent = HISTORY.length;
+
+  const sevenDays = Date.now() - 7*86400*1000;
+  let added=0, removed=0, drops7=0, raises7=0;
+  for (const ev of HISTORY) {
+    if (!ev.ts || new Date(ev.ts).getTime() < sevenDays) continue;
+    if (ev.type === 'added') added++;
+    else if (ev.type === 'removed') removed++;
+    else if (ev.type === 'price_dropped') drops7++;
+    else if (ev.type === 'price_raised') raises7++;
+  }
+  $('ms-added').textContent = added;
+  $('ms-drops').textContent = drops7;
+  $('ms-raises').textContent = raises7;
+  $('ms-removed').textContent = removed;
+  $('sp-week').textContent = added;
+  $('sp-week-sub').textContent = drops7 + ' ירידות · ' + removed + ' ירדו';
+}
+
+function showTab(name) {
+  currentTab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  $('tab-active').style.display = name === 'active' ? '' : 'none';
+  $('tab-saved').style.display = name === 'saved' ? '' : 'none';
+  $('tab-history').style.display = name === 'history' ? '' : 'none';
+  $('toolbar').style.display = name === 'active' ? '' : 'none';
+  if (name === 'saved') renderSaved();
+  if (name === 'history') renderHistory();
+}
+
+document.querySelector('.tabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab'); if (t) showTab(t.dataset.tab);
+});
+
+document.addEventListener('click', e => {
+  const card = e.target.closest('.apt-card');
+  if (!card) return;
+  const token = card.dataset.token;
+  const seenBtn = e.target.closest('[data-act=seen]');
+  const saveBtn = e.target.closest('[data-act=save]');
+  const link = e.target.closest('[data-no-act]');
+  if (link) return;
+  if (saveBtn) {
+    e.preventDefault();
+    if (savedSet.has(token)) { savedSet.delete(token); showToast('הוסר משמורים'); }
+    else { savedSet.add(token); showToast('נשמר ❤'); }
+    ls.set('saved', [...savedSet]);
+  } else if (seenBtn) {
+    e.preventDefault();
+    if (seenSet.has(token)) { seenSet.delete(token); showToast('בוטל סימון'); }
+    else { seenSet.add(token); showToast('סומן כראיתי'); }
+    ls.set('seen', [...seenSet]);
+  }
+  if (saveBtn || seenBtn) {
+    if (currentTab === 'active') renderActive();
+    else if (currentTab === 'saved') renderSaved();
+    computeStats();
+  }
+});
+
+$('rooms-chips').addEventListener('click', e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  $('rooms-chips').querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+  c.classList.add('active'); activeRooms = c.dataset.r;
+  renderActive(); if (activeView==='map') renderMap();
+});
+$('feat-chips').addEventListener('click', e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  const k = c.dataset.c; featOn[k] = !featOn[k];
+  c.classList.toggle('active', featOn[k]);
+  renderActive(); if (activeView==='map') renderMap();
+});
+$('price-min').addEventListener('input', e => { priceMin = +e.target.value || 0; renderActive(); if (activeView==='map') renderMap(); });
+$('price-max').addEventListener('input', e => { priceMax = +e.target.value || 999999; renderActive(); if (activeView==='map') renderMap(); });
+['newonly','droponly','hideseen'].forEach(k => {
+  $('cb-'+k).addEventListener('change', e => { urgency[k] = e.target.checked; renderActive(); if (activeView==='map') renderMap(); });
+});
+$('reset-btn').addEventListener('click', () => {
+  activeRooms = 'all'; priceMin = 8000; priceMax = 12000;
+  Object.keys(featOn).forEach(k => featOn[k] = false);
+  Object.keys(urgency).forEach(k => urgency[k] = false);
+  $('rooms-chips').querySelectorAll('.chip').forEach((x,i) => x.classList.toggle('active', i === 0));
+  $('feat-chips').querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+  $('price-min').value = 8000; $('price-max').value = 12000;
+  ['newonly','droponly','hideseen'].forEach(k => { $('cb-'+k).checked = false; });
+  renderActive(); if (activeView==='map') renderMap();
+  showToast('פילטרים אופסו');
+});
+$('toolbar').addEventListener('click', e => {
+  const s = e.target.closest('.sort-pill');
+  if (s) {
+    document.querySelectorAll('.sort-pill').forEach(x => x.classList.remove('active'));
+    s.classList.add('active'); activeSort = s.dataset.s;
+    renderActive(); if (activeView==='map') renderMap();
+  }
+  const v = e.target.closest('[data-v]');
+  if (v) {
+    document.querySelectorAll('.view-toggle button').forEach(x => x.classList.remove('active'));
+    v.classList.add('active'); activeView = v.dataset.v;
+    if (activeView === 'map') renderMap();
+    else { $('map-view').style.display = 'none'; renderActive(); }
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const cards = [...document.querySelectorAll('.apt-card')];
+  if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); kbIdx = Math.min(kbIdx+1, cards.length-1); highlightCard(cards, kbIdx); }
+  else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); kbIdx = Math.max(kbIdx-1, 0); highlightCard(cards, kbIdx); }
+  else if (e.key === 'Enter' && kbIdx >= 0) { const a = cards[kbIdx].querySelector('.apt-open'); if (a) window.open(a.href, '_blank'); }
+  else if ((e.key === 'f' || e.key === 'F') && kbIdx >= 0) { cards[kbIdx].querySelector('[data-act=save]').click(); }
+  else if ((e.key === 'x' || e.key === 'X') && kbIdx >= 0) {
+    const tok = cards[kbIdx].dataset.token;
+    dismissedSet.add(tok); ls.set('dismissed', [...dismissedSet]);
+    showToast('הוסתר'); renderActive();
+  }
+});
+function highlightCard(cards, idx) {
+  cards.forEach((c,i) => c.classList.toggle('kbd-active', i === idx));
+  const c = cards[idx]; if (c) c.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+computeStats();
+renderActive();
+</script>
+</body>
+</html>
