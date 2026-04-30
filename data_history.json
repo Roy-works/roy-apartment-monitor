@@ -1,6 +1,35 @@
 {
   "events": [
     {
+      "ts": "2026-04-30T12:37:45+00:00",
+      "type": "added",
+      "item": {
+        "token": "m27nxwpx",
+        "url": "https://www.yad2.co.il/realestate/item/m27nxwpx",
+        "street": "",
+        "house_number": null,
+        "floor": 25,
+        "neighborhood": "",
+        "city": "תל אביב יפו",
+        "lat": 32.087667,
+        "lon": 34.797374,
+        "rooms": 3,
+        "sqm": 86,
+        "price": 9000,
+        "price_before": null,
+        "ad_type": "commercial",
+        "agency": "אנגלו סכסון ת\"א",
+        "tags": [],
+        "image": "https://img.yad2.co.il/Pic/202604/30/2_6/o/y2_1pa_010944_20260430135900.jpeg",
+        "source_category": "agency",
+        "discovered_at": "2026-04-30T12:37:45+00:00",
+        "has_mamad": true,
+        "has_parking": false,
+        "has_balcony": false,
+        "score": 10
+      }
+    },
+    {
       "ts": "2026-04-29T07:13:34+00:00",
       "type": "added",
       "item": {
